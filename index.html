@@ -1,0 +1,763 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<title>Atlasmed — Design</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; background: #f0eee9; font-family: 'Inter', system-ui, -apple-system, sans-serif; height: 100%; overflow: hidden; }
+  * { box-sizing: border-box; }
+  input, button, textarea { font-family: inherit; }
+  ::-webkit-scrollbar { display: none; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Top navigation bar ── */
+  #design-nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 9999;
+    height: 50px;
+    background: rgba(255,255,255,0.96);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border-bottom: 1px solid rgba(0,0,0,0.07);
+    display: flex; align-items: center; padding: 0 14px; gap: 0;
+    box-shadow: 0 1px 8px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+  }
+
+  .nav-brand {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 14px; font-weight: 700; color: #0a2f7f;
+    letter-spacing: -0.3px; padding-right: 16px;
+    border-right: 1px solid #eef0f3; margin-right: 12px;
+    height: 30px; flex-shrink: 0;
+  }
+
+  .nav-tabs { display: flex; gap: 2px; flex: 1; }
+
+  .nav-tab {
+    padding: 6px 13px; border-radius: 8px; border: none;
+    background: transparent; cursor: pointer;
+    font-size: 13px; font-weight: 500; color: #6b7280;
+    font-family: 'Inter', system-ui; transition: all 150ms;
+    display: inline-flex; align-items: center; gap: 6px;
+    text-decoration: none;
+  }
+  a.nav-tab { color: #6b7280; }
+  .nav-tab .tab-dot {
+    width: 6px; height: 6px; border-radius: 3px; background: currentColor;
+    opacity: 0; transition: opacity 150ms;
+  }
+  .nav-tab.active {
+    background: #eef2ff; color: #0a2f7f; font-weight: 600;
+  }
+  .nav-tab.active .tab-dot { opacity: 1; }
+  .nav-tab:hover:not(.active) { background: #f3f4f6; color: #374151; }
+
+  .nav-right { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+
+  .theme-label { font-size: 11px; font-weight: 500; color: #9ca3af; }
+
+  .theme-seg {
+    display: flex; background: #f1f3f6; border-radius: 8px; padding: 2px;
+  }
+  .theme-seg button {
+    border: none; background: transparent; padding: 4px 10px;
+    font-size: 11.5px; font-weight: 500; color: #6b7280;
+    border-radius: 6px; cursor: pointer; transition: all 140ms;
+    font-family: 'Inter', system-ui;
+  }
+  .theme-seg button.on {
+    background: #fff; color: #0a2f7f; font-weight: 600;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+
+  /* ── Page containers ── */
+  .page-root {
+    position: fixed; top: 50px; left: 0; right: 0; bottom: 0;
+    overflow: hidden;
+  }
+</style>
+</head>
+<body>
+
+<!-- Navigation bar -->
+<nav id="design-nav">
+  <div class="nav-brand">
+    <svg width="22" height="15" viewBox="0 0 22 15" fill="none">
+      <path d="M1 13 Q11 -1, 21 13" stroke="#0a2f7f" strokeWidth="2.2" strokeLinecap="round" fill="none"/>
+      <circle cx="11" cy="7" r="2" fill="#16a373"/>
+    </svg>
+    Atlasmed
+  </div>
+  <div class="nav-tabs" id="navTabs">
+    <button class="nav-tab active" data-page="bi">
+      <span class="tab-dot"></span>Desempenho
+    </button>
+    <button class="nav-tab" data-page="login">
+      <span class="tab-dot"></span>Login Flow
+    </button>
+    <button class="nav-tab" data-page="explorar">
+      <span class="tab-dot"></span>Explorar
+    </button>
+    <button class="nav-tab" data-page="map">
+      <span class="tab-dot"></span>Mapa
+    </button>
+    <button class="nav-tab" data-page="pedidos">
+      <span class="tab-dot"></span>Pedidos
+    </button>
+    <button class="nav-tab" data-page="apresentacoes">
+      <span class="tab-dot"></span>Apresentações
+    </button>
+    <button class="nav-tab" data-page="perfil">
+      <span class="tab-dot"></span>Perfil
+    </button>
+  </div>
+  <div class="nav-right">
+    <span class="theme-label">Tema</span>
+    <div class="theme-seg" id="themeSeg">
+      <button data-theme="dark" class="on">Escuro</button>
+      <button data-theme="light">Claro</button>
+    </div>
+  </div>
+</nav>
+
+<!-- Page roots — only one visible at a time -->
+<div id="root-bi"            class="page-root"></div>
+<div id="root-login"         class="page-root" style="display:none"></div>
+<div id="root-explorar"      class="page-root" style="display:none"></div>
+<div id="root-map"           class="page-root" style="display:none"></div>
+<div id="root-pedidos"       class="page-root" style="display:none"></div>
+<div id="root-apresentacoes" class="page-root" style="display:none"></div>
+<div id="root-perfil"        class="page-root" style="display:none"></div>
+
+<!-- React 18 + Babel Standalone -->
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<!-- Shared component scripts (loaded once for all pages) -->
+<script type="text/babel" src="components/ios-frame.jsx"></script>
+<script type="text/babel" src="components/android-frame.jsx"></script>
+<script type="text/babel" src="components/design-canvas.jsx"></script>
+<script type="text/babel" src="components/atlas-logo.jsx"></script>
+<script type="text/babel" src="components/atlas-ui.jsx"></script>
+<script type="text/babel" src="components/atlas-data.jsx"></script>
+<script type="text/babel" src="components/atlas-screens.jsx"></script>
+<script type="text/babel" src="components/atlas-flow.jsx"></script>
+<script type="text/babel" src="components/atlas-list.jsx"></script>
+<script type="text/babel" src="components/atlas-clinic.jsx"></script>
+<script type="text/babel" src="components/atlas-doctor.jsx"></script>
+<script type="text/babel" src="components/atlas-map.jsx"></script>
+<script type="text/babel" src="components/atlas-bi.jsx"></script>
+<script type="text/babel" src="components/atlas-pedidos.jsx"></script>
+<script type="text/babel" src="components/atlas-presentations.jsx"></script>
+<script type="text/babel" src="components/atlas-profile.jsx"></script>
+
+<!-- Combined App -->
+<script type="text/babel">
+
+// ─── Nav tab switching ────────────────────────────────────────────────────────
+const _navTabs   = document.getElementById('navTabs');
+const _themeSeg  = document.getElementById('themeSeg');
+const _pageRoots = {
+  bi:            document.getElementById('root-bi'),
+  login:         document.getElementById('root-login'),
+  explorar:      document.getElementById('root-explorar'),
+  map:           document.getElementById('root-map'),
+  pedidos:       document.getElementById('root-pedidos'),
+  apresentacoes: document.getElementById('root-apresentacoes'),
+  perfil:        document.getElementById('root-perfil'),
+};
+
+window.__atlasPage  = 'bi';
+window.__atlasTheme = 'dark';
+
+_navTabs.addEventListener('click', (e) => {
+  const btn = e.target.closest('.nav-tab[data-page]');
+  if (!btn) return;
+  const page = btn.dataset.page;
+  if (page === window.__atlasPage) return;
+  window.__atlasPage = page;
+  _navTabs.querySelectorAll('.nav-tab').forEach(b =>
+    b.classList.toggle('active', b === btn)
+  );
+  Object.entries(_pageRoots).forEach(([k, el]) => {
+    el.style.display = k === page ? '' : 'none';
+  });
+});
+
+// ─── Theme toggle ─────────────────────────────────────────────────────────────
+_themeSeg.addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-theme]');
+  if (!btn) return;
+  const t = btn.dataset.theme;
+  window.__atlasTheme = t;
+  _themeSeg.querySelectorAll('button').forEach(b =>
+    b.classList.toggle('on', b.dataset.theme === t)
+  );
+  window.dispatchEvent(new CustomEvent('atlasThemeChange', { detail: t }));
+});
+
+// ─── ThemeCtx (shared across all pages) ──────────────────────────────────────
+const ThemeCtx = React.createContext('dark');
+
+// Override BlueBackdrop once so it reads from ThemeCtx
+const _origBlueBackdrop = window.BlueBackdrop;
+window.BlueBackdrop = function(props) {
+  const theme = React.useContext(ThemeCtx);
+  return _origBlueBackdrop({ theme: props.theme || theme });
+};
+
+// Hook to sync local theme state with the nav theme toggle
+function useThemeSync() {
+  const [theme, setTheme] = React.useState(window.__atlasTheme || 'dark');
+  React.useEffect(() => {
+    const handler = (e) => setTheme(e.detail);
+    window.addEventListener('atlasThemeChange', handler);
+    return () => window.removeEventListener('atlasThemeChange', handler);
+  }, []);
+  return theme;
+}
+
+// ─── Shared helpers (Login + Map) ────────────────────────────────────────────
+function FilledDemo({ platform }) {
+  const ctrl = useAtlasController({ initialScreen: 'login' });
+  React.useEffect(() => {
+    ctrl.setState({ email: 'rafael.melo@atlasmed.com', password: 'Atlas2026' });
+  }, []);
+  const Frame = platform === 'ios' ? IOSDevice : AndroidDevice;
+  return (
+    <Frame width={390} height={844}>
+      <AtlasFlowScreen ctrl={ctrl}/>
+    </Frame>
+  );
+}
+
+function PreFilledForgot({ step, platform, codeError = false }) {
+  const ctrl = useAtlasController({ initialScreen: step });
+  React.useEffect(() => {
+    ctrl.setState({
+      forgotEmail: 'rafael.melo@atlasmed.com',
+      code: step === 'forgot-code' ? (codeError ? '123000' : '') : '123456',
+      codeError,
+      newPassword: step === 'forgot-new' ? 'Atlas2026' : '',
+      confirmPassword: step === 'forgot-new' ? 'Atlas2026' : '',
+    });
+  }, []);
+  const Frame = platform === 'ios' ? IOSDevice : AndroidDevice;
+  return (
+    <Frame width={390} height={844}>
+      <AtlasFlowScreen ctrl={ctrl}/>
+    </Frame>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// PAGE 1 — Desempenho (BI)
+// ═══════════════════════════════════════════════════════════════════════════════
+function BIApp() {
+  return (
+    <DesignCanvas>
+      <DCSection id="bi-main"
+        title="Desempenho — visão do representante"
+        subtitle="Snapshot, funil, oportunidades, conversão, cobertura, insights e recomendações em uma só tela.">
+        <DCArtboard id="bi-full" label="Tela completa · rolagem" width={390} height={3200}>
+          <div style={{ position: 'absolute', inset: 0, background: '#f7f8fb', overflow: 'hidden' }}>
+            <BIScreen/>
+          </div>
+        </DCArtboard>
+        <DCArtboard id="bi-device" label="Dispositivo · topo" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <BIScreen/>
+          </AndroidDevice>
+        </DCArtboard>
+      </DCSection>
+    </DesignCanvas>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// PAGE 2 — Login Flow
+// ═══════════════════════════════════════════════════════════════════════════════
+function LoginApp() {
+  const theme = useThemeSync();
+  return (
+    <ThemeCtx.Provider value={theme}>
+      <DesignCanvas>
+
+        <DCSection id="splash-flow" title="1 · Abertura" subtitle="O usuário inicia o app e cai no login.">
+          <DCArtboard id="splash-and" label="Splash" width={390} height={844}>
+            <AtlasFlowSingle platform="android" initialScreen="splash"/>
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="login" title="2 · Login" subtitle="E-mail + senha, com opção de recuperação.">
+          <DCArtboard id="login-and" label="Login · vazio" width={390} height={844}>
+            <AtlasFlowSingle platform="android" initialScreen="login"/>
+          </DCArtboard>
+          <DCArtboard id="login-and-filled" label="Login · preenchido · interativo" width={390} height={844}>
+            <FilledDemo platform="android"/>
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="errors" title="3 · Erros" subtitle="Senha incorreta, bloqueio, sem conexão.">
+          <DCArtboard id="err-wrong" label="Senha incorreta" width={390} height={844}>
+            <AtlasFlowSingle platform="android" initialScreen="login" scenario="wrong"/>
+          </DCArtboard>
+          <DCArtboard id="err-locked" label="Conta bloqueada" width={390} height={844}>
+            <AtlasFlowSingle platform="android" initialScreen="login" scenario="locked"/>
+          </DCArtboard>
+          <DCArtboard id="err-net" label="Sem conexão" width={390} height={844}>
+            <AtlasFlowSingle platform="android" initialScreen="login" scenario="network"/>
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="forgot" title="4 · Esqueci minha senha" subtitle="E-mail → código → nova senha → sucesso.">
+          <DCArtboard id="forgot-email" label="Passo 1 · E-mail" width={390} height={844}>
+            <AtlasFlowSingle platform="android" initialScreen="forgot-email"/>
+          </DCArtboard>
+          <DCArtboard id="forgot-code" label="Passo 2 · Código" width={390} height={844}>
+            <PreFilledForgot step="forgot-code" platform="android"/>
+          </DCArtboard>
+          <DCArtboard id="forgot-code-err" label="Passo 2 · Código inválido" width={390} height={844}>
+            <PreFilledForgot step="forgot-code" platform="android" codeError/>
+          </DCArtboard>
+          <DCArtboard id="forgot-new" label="Passo 3 · Nova senha" width={390} height={844}>
+            <PreFilledForgot step="forgot-new" platform="android"/>
+          </DCArtboard>
+          <DCArtboard id="forgot-success" label="Sucesso" width={390} height={844}>
+            <AtlasFlowSingle platform="android" initialScreen="forgot-success"/>
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="success" title="5 · Acesso concedido" subtitle="Confirmação antes da área de trabalho.">
+          <DCArtboard id="login-ok-and" label="Sucesso" width={390} height={844}>
+            <AtlasFlowSingle platform="android" initialScreen="login-success"/>
+          </DCArtboard>
+        </DCSection>
+
+      </DesignCanvas>
+    </ThemeCtx.Provider>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// PAGE 3 — Explorar (Lista · Clínica · Médico)
+// ═══════════════════════════════════════════════════════════════════════════════
+function ExplorarApp() {
+  return (
+    <DesignCanvas>
+
+      <DCSection id="list" title="1 · Lista — Clínicas & Médicos" subtitle="Busca unificada com scroll infinito, filtros e ordenação.">
+        <DCArtboard id="list-clinics" label="Clínicas · padrão" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <ListScreen initialKind="clinic"/>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="list-doctors" label="Médicos · padrão" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <ListScreen initialKind="doctor"/>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="list-search" label="Buscando" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <ListScreen initialKind="clinic" initialQuery="santa"/>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="list-filter" label="Filtros aplicados" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <ListScreen initialKind="clinic" initialFilters={{ status: ['ativa','negociacao'], products: ['AtlasGel'] }}/>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="list-filter-sheet" label="Painel de filtros" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <ListScreen initialKind="clinic" initialFilterOpen/>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="list-sort-sheet" label="Painel de ordenação" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <ListScreen initialKind="clinic" initialSortOpen/>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="list-empty" label="Sem resultados" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <ListScreen initialKind="clinic" initialQuery="zzzzz"/>
+          </AndroidDevice>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="clinic-detail" title="2 · Clínica · página individual" subtitle="Tudo que um consultor precisa antes de entrar na clínica: sinais, saúde comercial, produtos em uso, histórico de visitas e dossiê dos médicos.">
+        <DCArtboard id="clinic-full" label="Página completa · rolagem" width={390} height={4400}>
+          <AndroidDevice width={390} height={4400}>
+            <ClinicDetailScreen/>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="clinic-top" label="Acima da dobra" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <ClinicDetailScreen/>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="clinic-doctors" label="Dossiê dos médicos" width={390} height={900}>
+          <AndroidDevice width={390} height={900}>
+            <div style={{position:'absolute',inset:0,background:'#f7f8fb',overflowY:'auto',paddingTop:16}}>
+              <ClinicDoctors doctors={CLINIC_DETAIL.doctors}/>
+              <ClinicNotes notes={CLINIC_DETAIL.notes}/>
+            </div>
+          </AndroidDevice>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="doctor-detail" title="3 · Médico · página individual" subtitle="Perfil detalhado de um médico — pessoal, prescrição, clínicas onde atende, histórico de visitas.">
+        <DCArtboard id="doctor-full" label="Página completa · rolagem" width={390} height={2400}>
+          <AndroidDevice width={390} height={2400}>
+            <DoctorDetailScreen/>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="doctor-top" label="Acima da dobra" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <DoctorDetailScreen/>
+          </AndroidDevice>
+        </DCArtboard>
+      </DCSection>
+
+    </DesignCanvas>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// PAGE 4 — Mapa
+// ═══════════════════════════════════════════════════════════════════════════════
+function MapApp() {
+  const theme = useThemeSync();
+  return (
+    <ThemeCtx.Provider value={theme}>
+      <DesignCanvas>
+
+        <DCSection id="map-initial" title="1 · Mapa — visão inicial" subtitle="Busca + pins coloridos por recorrência de visita + sugestão de alto potencial.">
+          <DCArtboard id="map-1" label="Visão inicial" width={390} height={844}>
+            <AndroidDevice width={390} height={844}>
+              <MapScreen1_Initial/>
+            </AndroidDevice>
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="map-clinic" title="2 · Clínica selecionada" subtitle="Bottom-sheet com contexto comercial, ações rápidas e clínicas próximas.">
+          <DCArtboard id="map-2" label="Clínica selecionada" width={390} height={844}>
+            <AndroidDevice width={390} height={844}>
+              <MapScreen2_ClinicSelected/>
+            </AndroidDevice>
+          </DCArtboard>
+          <DCArtboard id="map-2-full" label="Drawer completo · todas as seções" width={420} height={1400}>
+            <div style={{
+              position: 'absolute', inset: 0,
+              background: 'linear-gradient(180deg, #eef1ec 0%, #e4e8e1 100%)',
+              overflow: 'hidden',
+            }}>
+              <ClinicBottomSheet mode="full"/>
+            </div>
+          </DCArtboard>
+          <DCArtboard id="map-3" label="Clínicas próximas (slider)" width={390} height={844}>
+            <AndroidDevice width={390} height={844}>
+              <MapScreen3_NearbySheet/>
+            </AndroidDevice>
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="map-route" title="3 · Rota sugerida" subtitle="Resumo rápido + planejamento completo com reordenação.">
+          <DCArtboard id="map-4" label="Rota sugerida (resumo)" width={390} height={844}>
+            <AndroidDevice width={390} height={844}>
+              <MapScreen4_RouteSummary/>
+            </AndroidDevice>
+          </DCArtboard>
+          <DCArtboard id="map-5" label="Planejamento completo" width={390} height={844}>
+            <AndroidDevice width={390} height={844}>
+              <MapScreen5_RoutePlan/>
+            </AndroidDevice>
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="map-active" title="4 · Rota em execução" subtitle="Foco na próxima parada; sugestões contextuais no caminho.">
+          <DCArtboard id="map-6" label="Rota em execução" width={390} height={844}>
+            <AndroidDevice width={390} height={844}>
+              <MapScreen6_RouteActive/>
+            </AndroidDevice>
+          </DCArtboard>
+          <DCArtboard id="map-7" label="Sugestão dinâmica" width={390} height={844}>
+            <AndroidDevice width={390} height={844}>
+              <MapScreen7_DynamicSuggestion/>
+            </AndroidDevice>
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="map-visit-flow" title="4b · Fluxo de visita em rota" subtitle="Chegada à clínica → visita em andamento → concluir ao se afastar.">
+          <DCArtboard id="map-6b" label="Próximo da clínica · Iniciar visita" width={390} height={844}>
+            <AndroidDevice width={390} height={844}>
+              <MapScreen6b_NearClinicPrompt/>
+            </AndroidDevice>
+          </DCArtboard>
+          <DCArtboard id="map-6c" label="Visita em andamento" width={390} height={844}>
+            <AndroidDevice width={390} height={844}>
+              <MapScreen6c_VisitInProgress/>
+            </AndroidDevice>
+          </DCArtboard>
+          <DCArtboard id="map-6d" label="Saiu da localização · Concluir visita" width={390} height={844}>
+            <AndroidDevice width={390} height={844}>
+              <MapScreen6d_LeftLocationPrompt/>
+            </AndroidDevice>
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="map-log" title="5 · Registrar visita" subtitle="Resultado + anotação opcional + follow-up em poucos toques.">
+          <DCArtboard id="map-8" label="Registrar visita" width={390} height={844}>
+            <AndroidDevice width={390} height={844}>
+              <MapScreen8_LogVisit/>
+            </AndroidDevice>
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="map-followups" title="6 · Follow-ups" subtitle="Pendências, hoje, próximos e concluídos.">
+          <DCArtboard id="map-9" label="Follow-ups" width={390} height={844}>
+            <AndroidDevice width={390} height={844}>
+              <MapScreen9_Followups/>
+            </AndroidDevice>
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="map-quick" title="7 · Menu flutuante" subtitle="Acesso rápido a todas as áreas sem poluir o mapa.">
+          <DCArtboard id="map-10" label="Menu flutuante" width={390} height={844}>
+            <AndroidDevice width={390} height={844}>
+              <MapScreen10_QuickMenu/>
+            </AndroidDevice>
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="map-favorites" title="8 · Favoritos" subtitle="Clínicas marcadas como favoritas — atalho vindo do menu flutuante.">
+          <DCArtboard id="map-favorites-list" label="Lista de favoritos" width={390} height={844}>
+            <AndroidDevice width={390} height={844}>
+              <MapScreen_Favoritos/>
+            </AndroidDevice>
+          </DCArtboard>
+        </DCSection>
+
+      </DesignCanvas>
+    </ThemeCtx.Provider>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// PAGE 5 — Pedidos
+// ═══════════════════════════════════════════════════════════════════════════════
+function PedidosApp() {
+  return (
+    <DesignCanvas>
+
+      <DCSection id="orders-main"
+        title="1 · Meus Pedidos"
+        subtitle="Visão geral dos pedidos ativos e histórico. O botão Novo pedido fica fixo e centralizado no rodapé para máxima visibilidade.">
+        <DCArtboard id="orders-list" label="Com pedidos · CTA fixo no rodapé" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <MeusOrdersScreen/>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="orders-empty" label="Estado vazio · CTA fixo no rodapé" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <MeusOrdersScreen emptyState/>
+          </AndroidDevice>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="order-detail"
+        title="1b · Detalhes do Pedido"
+        subtitle="Ao tocar em um pedido da lista, o usuário vê todos os dados: acompanhamento, rastreio, destino, itens e pagamento.">
+        <DCArtboard id="detail-transit" label="Em trânsito · com rastreio" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <OrderDetailScreen orderId="PED-2041"/>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="detail-delivered" label="Entregue · histórico completo" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <OrderDetailScreen orderId="PED-2038"/>
+          </AndroidDevice>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="products"
+        title="2 · Novo Pedido — Produtos"
+        subtitle="Catálogo com busca, filtros por categoria e controle de quantidade.">
+        <DCArtboard id="products-default" label="Vista padrão · sem itens" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <NewOrderProductsScreen/>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="products-search" label={'Busca ativa · "atlas"'} width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <NewOrderProductsScreen searchQuery="atlas"/>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="products-cart" label="Carrinho em andamento" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <NewOrderProductsScreen cart={SAMPLE_CART}/>
+          </AndroidDevice>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="cart-review"
+        title="3 · Carrinho"
+        subtitle="Revisão dos itens selecionados e subtotal antes do checkout.">
+        <DCArtboard id="cart-screen" label="Revisão do carrinho" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <CartScreen/>
+          </AndroidDevice>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="checkout"
+        title="4 · Checkout"
+        subtitle="Seleção de clínica e médico, resumo e confirmação do pedido.">
+        <DCArtboard id="checkout-empty" label="Sem destino selecionado" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <CheckoutScreen/>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="checkout-filled" label="Destino selecionado · pronto para confirmar" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <CheckoutScreen prefilled/>
+          </AndroidDevice>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="order-success"
+        title="5 · Confirmação"
+        subtitle="Pedido confirmado com número, destino, itens e prazo de entrega.">
+        <DCArtboard id="success-screen" label="Pedido confirmado" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <OrderSuccessScreen/>
+          </AndroidDevice>
+        </DCArtboard>
+      </DCSection>
+
+    </DesignCanvas>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// PAGE 6 — Apresentações
+// ═══════════════════════════════════════════════════════════════════════════════
+function ApresentacoesApp() {
+  return (
+    <DesignCanvas>
+
+      <DCSection id="library"
+        title="1 · Biblioteca de Apresentações"
+        subtitle="Biblioteca institucional com busca, categorias, destaques e lista completa.">
+        <DCArtboard id="lib-default" label="Vista padrão · com destaques" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <PresentationsLibraryScreen/>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="lib-scroll" label="Lista completa · scroll" width={390} height={1400}>
+          <AndroidDevice width={390} height={1400}>
+            <PresentationsLibraryScreen/>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="lib-category" label={'Filtro · categoria "Produtos"'} width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <PresentationsLibraryScreen selectedCategory="Produtos"/>
+          </AndroidDevice>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="pres-search"
+        title="2 · Busca"
+        subtitle="O representante localiza uma apresentação digitando parte do título ou categoria.">
+        <DCArtboard id="search-atlas" label={'Busca ativa · "atlas"'} width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <PresentationsLibraryScreen searchQuery="atlas"/>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="search-clinico" label={'Busca · "clínico"'} width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <PresentationsLibraryScreen searchQuery="clínico"/>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="search-empty" label="Sem resultados" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <PresentationsLibraryScreen searchQuery="xyz123"/>
+          </AndroidDevice>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="pres-detail"
+        title="3 · Detalhe da Apresentação"
+        subtitle="Preview, metadados, relacionadas e ação de download ou compartilhamento.">
+        <DCArtboard id="detail-default" label="Pronta para baixar" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <PresentationDetailScreen presentationId="pr2"/>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="detail-pdf" label="Apresentação PDF · Visão Institucional" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <PresentationDetailScreen presentationId="pr1"/>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="detail-downloading" label="Baixando · 42%" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <PresentationDetailScreen presentationId="pr2" downloading progress={42}/>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="detail-downloaded" label="Baixada · abrir ou compartilhar" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <PresentationDetailScreen presentationId="pr2" downloaded/>
+          </AndroidDevice>
+        </DCArtboard>
+      </DCSection>
+
+    </DesignCanvas>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// PAGE 7 — Perfil
+// ═══════════════════════════════════════════════════════════════════════════════
+function PerfilApp() {
+  return (
+    <DesignCanvas>
+
+      <DCSection id="profile-main"
+        title="Perfil · visão do representante"
+        subtitle="Identidade, território, resumo rápido, preferências e atividade recente — um panorama pessoal, não um dashboard.">
+        <DCArtboard id="profile-full" label="Tela completa · rolagem" width={390} height={1600}>
+          <div style={{ position: 'absolute', inset: 0, background: '#f7f8fb', overflow: 'hidden' }}>
+            <ProfileScreen/>
+          </div>
+        </DCArtboard>
+        <DCArtboard id="profile-device" label="Dispositivo · topo" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <ProfileScreen/>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="profile-logout" label="Confirmação · sair da conta" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <ProfileScreen logoutConfirm/>
+          </AndroidDevice>
+        </DCArtboard>
+      </DCSection>
+
+    </DesignCanvas>
+  );
+}
+
+// ─── Mount all pages ──────────────────────────────────────────────────────────
+ReactDOM.createRoot(document.getElementById('root-bi')).render(<BIApp/>);
+ReactDOM.createRoot(document.getElementById('root-login')).render(<LoginApp/>);
+ReactDOM.createRoot(document.getElementById('root-explorar')).render(<ExplorarApp/>);
+ReactDOM.createRoot(document.getElementById('root-map')).render(<MapApp/>);
+ReactDOM.createRoot(document.getElementById('root-pedidos')).render(<PedidosApp/>);
+ReactDOM.createRoot(document.getElementById('root-apresentacoes')).render(<ApresentacoesApp/>);
+ReactDOM.createRoot(document.getElementById('root-perfil')).render(<PerfilApp/>);
+
+</script>
+</body>
+</html>

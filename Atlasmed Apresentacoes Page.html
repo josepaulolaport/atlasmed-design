@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<title>Atlasmed — Apresentações</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; background: #f0eee9; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+  * { box-sizing: border-box; }
+  input, button, textarea { font-family: inherit; }
+  ::-webkit-scrollbar { display: none; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="components/android-frame.jsx"></script>
+<script type="text/babel" src="components/design-canvas.jsx"></script>
+<script type="text/babel" src="components/atlas-ui.jsx"></script>
+<script type="text/babel" src="components/atlas-presentations.jsx"></script>
+
+<script type="text/babel">
+function App() {
+  return (
+    <DesignCanvas>
+
+      <DCSection id="library"
+        title="1 · Biblioteca de Apresentações"
+        subtitle="Biblioteca institucional com busca, categorias, destaques e lista completa.">
+        <DCArtboard id="lib-default" label="Vista padrão · com destaques" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <PresentationsLibraryScreen/>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="lib-scroll" label="Lista completa · scroll" width={390} height={1400}>
+          <AndroidDevice width={390} height={1400}>
+            <PresentationsLibraryScreen/>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="lib-category" label={'Filtro · categoria "Produtos"'} width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <PresentationsLibraryScreen selectedCategory="Produtos"/>
+          </AndroidDevice>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="search"
+        title="2 · Busca"
+        subtitle="O representante localiza uma apresentação digitando parte do título ou categoria.">
+        <DCArtboard id="search-atlas" label={'Busca ativa · "atlas"'} width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <PresentationsLibraryScreen searchQuery="atlas"/>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="search-clinico" label={'Busca · "clínico"'} width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <PresentationsLibraryScreen searchQuery="clínico"/>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="search-empty" label="Sem resultados" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <PresentationsLibraryScreen searchQuery="xyz123"/>
+          </AndroidDevice>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="detail"
+        title="3 · Detalhe da Apresentação"
+        subtitle="Preview, metadados, relacionadas e ação de download ou compartilhamento.">
+        <DCArtboard id="detail-default" label="Pronta para baixar" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <PresentationDetailScreen presentationId="pr2"/>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="detail-pdf" label="Apresentação PDF · Visão Institucional" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <PresentationDetailScreen presentationId="pr1"/>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="detail-downloading" label="Baixando · 42%" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <PresentationDetailScreen presentationId="pr2" downloading progress={42}/>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="detail-downloaded" label="Baixada · abrir ou compartilhar" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <PresentationDetailScreen presentationId="pr2" downloaded/>
+          </AndroidDevice>
+        </DCArtboard>
+      </DCSection>
+
+    </DesignCanvas>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>

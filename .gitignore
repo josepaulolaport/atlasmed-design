@@ -1,0 +1,18 @@
+# Per-user UI state written by DesignCanvas (artboard order, renames)
+.design-canvas.state.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors / IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Claude Code local settings
+.claude/
+
+# Node (none expected, but belt-and-suspenders)
+node_modules/

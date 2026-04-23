@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<title>Atlasmed — Map Page</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; background: #f0eee9; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+  * { box-sizing: border-box; }
+  input, button, textarea { font-family: inherit; }
+  ::-webkit-scrollbar { display: none; }
+
+  /* Tweaks panel */
+  .tweaks-panel {
+    position: fixed; bottom: 20px; right: 20px;
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.08);
+    border-radius: 14px;
+    padding: 16px 18px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06);
+    z-index: 1000;
+    font-family: 'Inter', system-ui, sans-serif;
+    width: 240px;
+    display: none;
+  }
+  .tweaks-panel.on { display: block; }
+  .tweaks-title {
+    font-size: 11px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase;
+    color: #666; margin-bottom: 12px;
+  }
+  .tweaks-row {
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 13px; color: #1a1a1a; font-weight: 500;
+    padding: 8px 0;
+  }
+  .tweaks-seg { display: inline-flex; background: #f1f1f3; border-radius: 8px; padding: 2px; }
+  .tweaks-seg button {
+    border: none; background: transparent; padding: 4px 10px;
+    font-size: 12px; font-weight: 500; color: #555; cursor: pointer;
+    border-radius: 6px; transition: all 160ms;
+  }
+  .tweaks-seg button.on { background: #fff; color: #0a2f7f; box-shadow: 0 1px 2px rgba(0,0,0,0.08); }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<div class="tweaks-panel" id="tweaksPanel">
+  <div class="tweaks-title">Tweaks</div>
+  <div class="tweaks-row">
+    <span>Modo</span>
+    <div class="tweaks-seg" id="themeSeg">
+      <button data-theme="dark" class="on">Escuro</button>
+      <button data-theme="light">Claro</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="components/ios-frame.jsx"></script>
+<script type="text/babel" src="components/android-frame.jsx"></script>
+<script type="text/babel" src="components/design-canvas.jsx"></script>
+<script type="text/babel" src="components/atlas-logo.jsx"></script>
+<script type="text/babel" src="components/atlas-ui.jsx"></script>
+<script type="text/babel" src="components/atlas-screens.jsx"></script>
+<script type="text/babel" src="components/atlas-flow.jsx"></script>
+<script type="text/babel" src="components/atlas-data.jsx"></script>
+<script type="text/babel" src="components/atlas-list.jsx"></script>
+<script type="text/babel" src="components/atlas-clinic.jsx"></script>
+<script type="text/babel" src="components/atlas-map.jsx"></script>
+
+<script type="text/babel">
+const TWEAK_DEFAULS = /*EDITMODE-BEGIN*/{
+  "theme": "dark"
+}/*EDITMODE-END*/;
+
+function Artboard({ screen, scenario = 'happy', initialScreen }) {
+  return (
+    <AtlasFlowSingle
+      platform={screen}
+      initialScreen={initialScreen || 'login'}
+      scenario={scenario}
+    />
+  );
+}
+
+// Wrapper that applies theme override via setState hack -- simplest path:
+// a CSS filter on the root for "light" mode is inappropriate. Instead we
+// re-render with theme prop via a top-level ThemeCtx.
+const ThemeCtx = React.createContext('dark');
+
+function ThemedBackdrop() {
+  const theme = React.useContext(ThemeCtx);
+  return <BlueBackdrop theme={theme}/>;
+}
+// Override global BlueBackdrop export to respect context:
+const _origBackdrop = window.BlueBackdrop;
+window.BlueBackdrop = function(props) {
+  const theme = React.useContext(ThemeCtx);
+  return _origBackdrop({ theme: props.theme || theme });
+};
+
+function App() {
+  const [theme, setTheme] = React.useState(TWEAK_DEFAULS.theme || 'dark');
+
+  // Tweaks wiring
+  React.useEffect(() => {
+    const panel = document.getElementById('tweaksPanel');
+    const seg = document.getElementById('themeSeg');
+    const handle = (e) => {
+      if (e.data?.type === '__activate_edit_mode') panel.classList.add('on');
+      if (e.data?.type === '__deactivate_edit_mode') panel.classList.remove('on');
+    };
+    window.addEventListener('message', handle);
+    window.parent.postMessage({ type: '__edit_mode_available' }, '*');
+
+    seg.addEventListener('click', (e) => {
+      const b = e.target.closest('button[data-theme]');
+      if (!b) return;
+      const t = b.dataset.theme;
+      setTheme(t);
+      seg.querySelectorAll('button').forEach(btn => btn.classList.toggle('on', btn.dataset.theme === t));
+      window.parent.postMessage({ type: '__edit_mode_set_keys', edits: { theme: t } }, '*');
+    });
+
+    // set initial seg state
+    seg.querySelectorAll('button').forEach(btn => btn.classList.toggle('on', btn.dataset.theme === (TWEAK_DEFAULS.theme || 'dark')));
+
+    return () => window.removeEventListener('message', handle);
+  }, []);
+
+  return (
+    <ThemeCtx.Provider value={theme}>
+      <DesignCanvas>
+        <DCSection id="map-initial" title="1 · Mapa — visão inicial" subtitle="Busca + pins coloridos por recorência de visita + sugestão de alto potencial.">
+          <DCArtboard id="map-1" label="Visão inicial" width={390} height={844}>
+            <AndroidDevice width={390} height={844}>
+              <MapScreen1_Initial/>
+            </AndroidDevice>
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="map-clinic" title="2 · Clínica selecionada" subtitle="Bottom-sheet com contexto comercial, ações rápidas e clínicas próximas.">
+          <DCArtboard id="map-2" label="Clínica selecionada" width={390} height={844}>
+            <AndroidDevice width={390} height={844}>
+              <MapScreen2_ClinicSelected/>
+            </AndroidDevice>
+          </DCArtboard>
+          <DCArtboard id="map-2-full" label="Drawer completo · todas as seções" width={420} height={1400}>
+            <div style={{
+              position: 'absolute', inset: 0,
+              background: 'linear-gradient(180deg, #eef1ec 0%, #e4e8e1 100%)',
+              overflow: 'hidden',
+            }}>
+              <ClinicBottomSheet mode="full"/>
+            </div>
+          </DCArtboard>
+          <DCArtboard id="map-3" label="Clínicas próximas (slider)" width={390} height={844}>
+            <AndroidDevice width={390} height={844}>
+              <MapScreen3_NearbySheet/>
+            </AndroidDevice>
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="map-route" title="3 · Rota sugerida" subtitle="Resumo rápido + planejamento completo com reordenação.">
+          <DCArtboard id="map-4" label="Rota sugerida (resumo)" width={390} height={844}>
+            <AndroidDevice width={390} height={844}>
+              <MapScreen4_RouteSummary/>
+            </AndroidDevice>
+          </DCArtboard>
+          <DCArtboard id="map-5" label="Planejamento completo" width={390} height={844}>
+            <AndroidDevice width={390} height={844}>
+              <MapScreen5_RoutePlan/>
+            </AndroidDevice>
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="map-active" title="4 · Rota em execução" subtitle="Foco na próxima parada; sugestões contextuais no caminho.">
+          <DCArtboard id="map-6" label="Rota em execução" width={390} height={844}>
+            <AndroidDevice width={390} height={844}>
+              <MapScreen6_RouteActive/>
+            </AndroidDevice>
+          </DCArtboard>
+          <DCArtboard id="map-7" label="Sugestão dinâmica" width={390} height={844}>
+            <AndroidDevice width={390} height={844}>
+              <MapScreen7_DynamicSuggestion/>
+            </AndroidDevice>
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="map-visit-flow" title="4b · Fluxo de visita em rota" subtitle="Chegada à clínica → visita em andamento → concluir ao se afastar.">
+          <DCArtboard id="map-6b" label="Próximo da clínica · Iniciar visita" width={390} height={844}>
+            <AndroidDevice width={390} height={844}>
+              <MapScreen6b_NearClinicPrompt/>
+            </AndroidDevice>
+          </DCArtboard>
+          <DCArtboard id="map-6c" label="Visita em andamento" width={390} height={844}>
+            <AndroidDevice width={390} height={844}>
+              <MapScreen6c_VisitInProgress/>
+            </AndroidDevice>
+          </DCArtboard>
+          <DCArtboard id="map-6d" label="Saiu da localização · Concluir visita" width={390} height={844}>
+            <AndroidDevice width={390} height={844}>
+              <MapScreen6d_LeftLocationPrompt/>
+            </AndroidDevice>
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="map-log" title="5 · Registrar visita" subtitle="Resultado + anotação opcional + follow-up em poucos toques.">
+          <DCArtboard id="map-8" label="Registrar visita" width={390} height={844}>
+            <AndroidDevice width={390} height={844}>
+              <MapScreen8_LogVisit/>
+            </AndroidDevice>
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="map-followups" title="6 · Follow-ups" subtitle="Pendências, hoje, próximos e concluídos.">
+          <DCArtboard id="map-9" label="Follow-ups" width={390} height={844}>
+            <AndroidDevice width={390} height={844}>
+              <MapScreen9_Followups/>
+            </AndroidDevice>
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="map-quick" title="7 · Menu flutuante" subtitle="Acesso rápido a todas as áreas sem poluir o mapa.">
+          <DCArtboard id="map-10" label="Menu flutuante" width={390} height={844}>
+            <AndroidDevice width={390} height={844}>
+              <MapScreen10_QuickMenu/>
+            </AndroidDevice>
+          </DCArtboard>
+        </DCSection>
+      </DesignCanvas>
+    </ThemeCtx.Provider>
+  );
+}
+
+// An interactive, prefilled login — user can click Entrar and see the flow run.
+function FilledDemo({ platform }) {
+  const ctrl = useAtlasController({ initialScreen: 'login' });
+  React.useEffect(() => {
+    ctrl.setState({ email: 'rafael.melo@atlasmed.com', password: 'Atlas2026' });
+  }, []);
+  const Frame = platform === 'ios' ? IOSDevice : AndroidDevice;
+  return (
+    <Frame width={390} height={844}>
+      <AtlasFlowScreen ctrl={ctrl}/>
+    </Frame>
+  );
+}
+
+// Forgot-flow artboards with prefilled context
+function PreFilledForgot({ step, platform, codeError = false }) {
+  const ctrl = useAtlasController({ initialScreen: step });
+  React.useEffect(() => {
+    ctrl.setState({
+      forgotEmail: 'rafael.melo@atlasmed.com',
+      code: step === 'forgot-code' ? (codeError ? '123000' : '') : '123456',
+      codeError,
+      newPassword: step === 'forgot-new' ? 'Atlas2026' : '',
+      confirmPassword: step === 'forgot-new' ? 'Atlas2026' : '',
+    });
+  }, []);
+  const Frame = platform === 'ios' ? IOSDevice : AndroidDevice;
+  return (
+    <Frame width={390} height={844}>
+      <AtlasFlowScreen ctrl={ctrl}/>
+    </Frame>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
