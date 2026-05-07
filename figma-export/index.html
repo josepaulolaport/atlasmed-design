@@ -1,0 +1,476 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<title>Atlasmed — Figma export</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; background: #f0eee9; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+  * { box-sizing: border-box; }
+  input, button, textarea { font-family: inherit; }
+  ::-webkit-scrollbar { display: none; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<!-- Same component bundle as the rest of the project, loaded from ../components/. -->
+<script type="text/babel" src="../components/ios-frame.jsx"></script>
+<script type="text/babel" src="../components/android-frame.jsx"></script>
+<script type="text/babel" src="../components/atlas-logo.jsx"></script>
+<script type="text/babel" src="../components/atlas-ui.jsx"></script>
+<script type="text/babel" src="../components/atlas-data.jsx"></script>
+<script type="text/babel" src="../components/atlas-screens.jsx"></script>
+<script type="text/babel" src="../components/atlas-flow.jsx"></script>
+<script type="text/babel" src="../components/atlas-list.jsx"></script>
+<script type="text/babel" src="../components/atlas-clinic.jsx"></script>
+<script type="text/babel" src="../components/atlas-doctor.jsx"></script>
+<script type="text/babel" src="../components/atlas-map.jsx"></script>
+<script type="text/babel" src="../components/atlas-bi.jsx"></script>
+<script type="text/babel" src="../components/atlas-pedidos.jsx"></script>
+<script type="text/babel" src="../components/atlas-presentations.jsx"></script>
+<script type="text/babel" src="../components/atlas-profile.jsx"></script>
+
+<script type="text/babel">
+// ─────────────────────────────────────────────────────────────
+// Atlasmed — Figma export hub
+//
+// Renders one screen per URL at exactly its pixel dimensions, so
+// html.to.design (or any HTML→Figma plugin) gets a clean, single-frame
+// import per call.
+//
+//   - `?frame=<id>`              → renders just that screen, body sized
+//                                  to the frame; no padding, no chrome,
+//                                  no labels.
+//   - `?frame=<id>&chrome=device`→ wraps in an AndroidDevice mockup
+//                                  (only meaningful for screens that
+//                                  don't already include device chrome).
+//   - no query string            → renders the index page (a clickable
+//                                  table of contents with all URLs).
+// ─────────────────────────────────────────────────────────────
+
+// ─── Theme context (some screens read it via window.BlueBackdrop) ───
+const ThemeCtx = React.createContext('dark');
+const _origBlueBackdrop = window.BlueBackdrop;
+window.BlueBackdrop = function (props) {
+  const theme = React.useContext(ThemeCtx);
+  return _origBlueBackdrop({ theme: props.theme || theme });
+};
+
+// ─── Login-flow helpers (lifted from index.html so the same demo
+//    states render here without depending on the multi-page mount) ───
+function FilledDemo({ platform = 'android' }) {
+  const ctrl = useAtlasController({ initialScreen: 'login' });
+  React.useEffect(() => {
+    ctrl.setState({ email: 'rafael.melo@atlasmed.com', password: 'Atlas2026' });
+  }, []);
+  const Frame = platform === 'ios' ? IOSDevice : AndroidDevice;
+  return <Frame width={390} height={844}><AtlasFlowScreen ctrl={ctrl}/></Frame>;
+}
+
+function PreFilledForgot({ step, platform = 'android', codeError = false }) {
+  const ctrl = useAtlasController({ initialScreen: step });
+  React.useEffect(() => {
+    ctrl.setState({
+      forgotEmail: 'rafael.melo@atlasmed.com',
+      code: step === 'forgot-code' ? (codeError ? '123000' : '') : '123456',
+      codeError,
+      newPassword: step === 'forgot-new' ? 'Atlas2026' : '',
+      confirmPassword: step === 'forgot-new' ? 'Atlas2026' : '',
+    });
+  }, []);
+  const Frame = platform === 'ios' ? IOSDevice : AndroidDevice;
+  return <Frame width={390} height={844}><AtlasFlowScreen ctrl={ctrl}/></Frame>;
+}
+
+// ─── Tiny helper: BIScreen lives in atlas-bi.jsx and uses
+//    `position: absolute; inset: 0`, so it must always be wrapped in a
+//    `position: relative` box of the right size or it escapes to the
+//    viewport. Other screens already wrap themselves. ───
+function BIBox({ width, height, view }) {
+  return (
+    <div style={{ position: 'relative', width, height, background: '#f7f8fb', overflow: 'hidden' }}>
+      <BIScreen initialView={view}/>
+    </div>
+  );
+}
+
+// ─── Frame registry ────────────────────────────────────────────────
+//
+// Each entry: { width, height, render, group, label }
+//   - `render()` returns the JSX for the entire frame (including any
+//     device chrome or page wrapper required for that screen).
+//   - `group` is used to organize the index page.
+//   - `label` is a human-readable name shown on the index.
+//
+// IDs are stable; they're the URLs you paste into html.to.design.
+//
+const FRAMES = {
+
+  // ── BI · Portal de Desempenho ─────────────────────────────────────
+  'bi/dashboard':              { group: 'BI · Portal de Desempenho', label: 'Dashboard · tela completa', width: 390, height: 1420,
+    render: () => <BIBox width={390} height={1420} view={{ type: 'main' }}/> },
+  'bi/dashboard-844':          { group: 'BI · Portal de Desempenho', label: 'Dashboard · acima da dobra', width: 390, height: 844,
+    render: () => <BIBox width={390} height={844} view={{ type: 'main' }}/> },
+  'bi/metric-receita':         { group: 'BI · Portal de Desempenho', label: 'KPI · Receita', width: 390, height: 844,
+    render: () => <BIBox width={390} height={844} view={{ type: 'metric', metric: 'receita' }}/> },
+  'bi/metric-pedidos':         { group: 'BI · Portal de Desempenho', label: 'KPI · Pedidos', width: 390, height: 844,
+    render: () => <BIBox width={390} height={844} view={{ type: 'metric', metric: 'pedidos' }}/> },
+  'bi/metric-ticket':          { group: 'BI · Portal de Desempenho', label: 'KPI · Ticket médio', width: 390, height: 844,
+    render: () => <BIBox width={390} height={844} view={{ type: 'metric', metric: 'ticketMedio' }}/> },
+  'bi/metric-visitas-semana':  { group: 'BI · Portal de Desempenho', label: 'KPI · Visitas na semana', width: 390, height: 844,
+    render: () => <BIBox width={390} height={844} view={{ type: 'metric', metric: 'visitsWeek' }}/> },
+  'bi/metric-visitas-hoje':    { group: 'BI · Portal de Desempenho', label: 'KPI · Visitas hoje', width: 390, height: 844,
+    render: () => <BIBox width={390} height={844} view={{ type: 'metric', metric: 'visitsToday' }}/> },
+  'bi/metric-followups':       { group: 'BI · Portal de Desempenho', label: 'KPI · Follow-ups', width: 390, height: 844,
+    render: () => <BIBox width={390} height={844} view={{ type: 'metric', metric: 'followupsPending' }}/> },
+  'bi/metric-novas':           { group: 'BI · Portal de Desempenho', label: 'KPI · Novas clínicas', width: 390, height: 844,
+    render: () => <BIBox width={390} height={844} view={{ type: 'metric', metric: 'newClinics' }}/> },
+  'bi/status-sem':             { group: 'BI · Portal de Desempenho', label: 'Status · Sem interação', width: 390, height: 844,
+    render: () => <BIBox width={390} height={844} view={{ type: 'clinic-status', statusKey: 'sem',   statusLabel: 'Sem interação' }}/> },
+  'bi/status-neg':             { group: 'BI · Portal de Desempenho', label: 'Status · Em negociação', width: 390, height: 844,
+    render: () => <BIBox width={390} height={844} view={{ type: 'clinic-status', statusKey: 'neg',   statusLabel: 'Em negociação' }}/> },
+  'bi/status-ativa':           { group: 'BI · Portal de Desempenho', label: 'Status · Ativa', width: 390, height: 844,
+    render: () => <BIBox width={390} height={844} view={{ type: 'clinic-status', statusKey: 'ativa', statusLabel: 'Ativa' }}/> },
+  'bi/status-risco':           { group: 'BI · Portal de Desempenho', label: 'Status · Em risco', width: 390, height: 844,
+    render: () => <BIBox width={390} height={844} view={{ type: 'clinic-status', statusKey: 'risco', statusLabel: 'Em risco' }}/> },
+  'bi/status-rej':             { group: 'BI · Portal de Desempenho', label: 'Status · Rejeição', width: 390, height: 844,
+    render: () => <BIBox width={390} height={844} view={{ type: 'clinic-status', statusKey: 'rej',   statusLabel: 'Rejeição' }}/> },
+  'bi/territory':              { group: 'BI · Portal de Desempenho', label: 'Território · cobertura', width: 390, height: 844,
+    render: () => <BIBox width={390} height={844} view={{ type: 'territory' }}/> },
+  'bi/territory-risco':        { group: 'BI · Portal de Desempenho', label: 'Território · em risco', width: 390, height: 844,
+    render: () => <BIBox width={390} height={844} view={{ type: 'territory', focus: 'risco' }}/> },
+  'bi/activity':               { group: 'BI · Portal de Desempenho', label: 'Atividade · análise', width: 390, height: 844,
+    render: () => <BIBox width={390} height={844} view={{ type: 'activity' }}/> },
+  'bi/conversion':             { group: 'BI · Portal de Desempenho', label: 'Conversão · análise', width: 390, height: 844,
+    render: () => <BIBox width={390} height={844} view={{ type: 'conversion' }}/> },
+  'bi/data-quality':           { group: 'BI · Portal de Desempenho', label: 'Qualidade dos dados', width: 390, height: 844,
+    render: () => <BIBox width={390} height={844} view={{ type: 'data-quality' }}/> },
+
+  // ── Login / Onboarding flow ───────────────────────────────────────
+  'login/splash':              { group: 'Login & Onboarding', label: 'Splash', width: 390, height: 844,
+    render: () => <AtlasFlowSingle platform="android" initialScreen="splash"/> },
+  'login/login':               { group: 'Login & Onboarding', label: 'Login · vazio', width: 390, height: 844,
+    render: () => <AtlasFlowSingle platform="android" initialScreen="login"/> },
+  'login/login-filled':        { group: 'Login & Onboarding', label: 'Login · preenchido', width: 390, height: 844,
+    render: () => <FilledDemo platform="android"/> },
+  'login/err-wrong':           { group: 'Login & Onboarding', label: 'Erro · senha incorreta', width: 390, height: 844,
+    render: () => <AtlasFlowSingle platform="android" initialScreen="login" scenario="wrong"/> },
+  'login/err-locked':          { group: 'Login & Onboarding', label: 'Erro · conta bloqueada', width: 390, height: 844,
+    render: () => <AtlasFlowSingle platform="android" initialScreen="login" scenario="locked"/> },
+  'login/err-network':         { group: 'Login & Onboarding', label: 'Erro · sem conexão', width: 390, height: 844,
+    render: () => <AtlasFlowSingle platform="android" initialScreen="login" scenario="network"/> },
+  'login/forgot-email':        { group: 'Login & Onboarding', label: 'Esqueci · e-mail', width: 390, height: 844,
+    render: () => <AtlasFlowSingle platform="android" initialScreen="forgot-email"/> },
+  'login/forgot-code':         { group: 'Login & Onboarding', label: 'Esqueci · código', width: 390, height: 844,
+    render: () => <PreFilledForgot step="forgot-code" platform="android"/> },
+  'login/forgot-code-err':     { group: 'Login & Onboarding', label: 'Esqueci · código inválido', width: 390, height: 844,
+    render: () => <PreFilledForgot step="forgot-code" platform="android" codeError/> },
+  'login/forgot-new':          { group: 'Login & Onboarding', label: 'Esqueci · nova senha', width: 390, height: 844,
+    render: () => <PreFilledForgot step="forgot-new" platform="android"/> },
+  'login/forgot-success':      { group: 'Login & Onboarding', label: 'Esqueci · sucesso', width: 390, height: 844,
+    render: () => <AtlasFlowSingle platform="android" initialScreen="forgot-success"/> },
+  'login/login-success':       { group: 'Login & Onboarding', label: 'Login · sucesso', width: 390, height: 844,
+    render: () => <AtlasFlowSingle platform="android" initialScreen="login-success"/> },
+
+  // ── Explorar (Lista, Clínica, Médico) ─────────────────────────────
+  'explorar/list-clinics':     { group: 'Explorar', label: 'Lista · Clínicas', width: 390, height: 844,
+    render: () => <AndroidDevice width={390} height={844}><ListScreen initialKind="clinic"/></AndroidDevice> },
+  'explorar/list-doctors':     { group: 'Explorar', label: 'Lista · Médicos', width: 390, height: 844,
+    render: () => <AndroidDevice width={390} height={844}><ListScreen initialKind="doctor"/></AndroidDevice> },
+  'explorar/list-search':      { group: 'Explorar', label: 'Lista · Buscando', width: 390, height: 844,
+    render: () => <AndroidDevice width={390} height={844}><ListScreen initialKind="clinic" initialQuery="santa"/></AndroidDevice> },
+  'explorar/list-filter':      { group: 'Explorar', label: 'Lista · Filtros aplicados', width: 390, height: 844,
+    render: () => <AndroidDevice width={390} height={844}><ListScreen initialKind="clinic" initialFilters={{ status: ['ativa','negociacao'], products: ['AtlasGel'] }}/></AndroidDevice> },
+  'explorar/list-filter-sheet':{ group: 'Explorar', label: 'Lista · Painel de filtros', width: 390, height: 844,
+    render: () => <AndroidDevice width={390} height={844}><ListScreen initialKind="clinic" initialFilterOpen/></AndroidDevice> },
+  'explorar/list-sort-sheet':  { group: 'Explorar', label: 'Lista · Painel de ordenação', width: 390, height: 844,
+    render: () => <AndroidDevice width={390} height={844}><ListScreen initialKind="clinic" initialSortOpen/></AndroidDevice> },
+  'explorar/list-empty':       { group: 'Explorar', label: 'Lista · Sem resultados', width: 390, height: 844,
+    render: () => <AndroidDevice width={390} height={844}><ListScreen initialKind="clinic" initialQuery="zzzzz"/></AndroidDevice> },
+
+  'explorar/clinic-full':      { group: 'Explorar', label: 'Clínica · página completa', width: 390, height: 4400,
+    render: () => <AndroidDevice width={390} height={4400}><ClinicDetailScreen/></AndroidDevice> },
+  'explorar/clinic-top':       { group: 'Explorar', label: 'Clínica · acima da dobra', width: 390, height: 844,
+    render: () => <AndroidDevice width={390} height={844}><ClinicDetailScreen/></AndroidDevice> },
+  'explorar/clinic-doctors':   { group: 'Explorar', label: 'Clínica · dossiê dos médicos', width: 390, height: 900,
+    render: () => (
+      <AndroidDevice width={390} height={900}>
+        <div style={{position:'absolute',inset:0,background:'#f7f8fb',overflowY:'auto',paddingTop:16}}>
+          <ClinicDoctors doctors={CLINIC_DETAIL.doctors}/>
+          <ClinicNotes notes={CLINIC_DETAIL.notes}/>
+        </div>
+      </AndroidDevice>
+    ) },
+
+  'explorar/doctor-full':      { group: 'Explorar', label: 'Médico · página completa', width: 390, height: 2400,
+    render: () => <AndroidDevice width={390} height={2400}><DoctorDetailScreen/></AndroidDevice> },
+  'explorar/doctor-top':       { group: 'Explorar', label: 'Médico · acima da dobra', width: 390, height: 844,
+    render: () => <AndroidDevice width={390} height={844}><DoctorDetailScreen/></AndroidDevice> },
+
+  // ── Mapa ──────────────────────────────────────────────────────────
+  'map/initial':               { group: 'Mapa', label: 'Visão inicial', width: 390, height: 844,
+    render: () => <AndroidDevice width={390} height={844}><MapScreen1_Initial/></AndroidDevice> },
+  'map/clinic-selected':       { group: 'Mapa', label: 'Clínica selecionada', width: 390, height: 844,
+    render: () => <AndroidDevice width={390} height={844}><MapScreen2_ClinicSelected/></AndroidDevice> },
+  'map/clinic-drawer-full':    { group: 'Mapa', label: 'Drawer completo · clínica', width: 420, height: 1400,
+    render: () => (
+      <div style={{ position:'absolute', inset:0, background:'linear-gradient(180deg, #eef1ec 0%, #e4e8e1 100%)', overflow:'hidden' }}>
+        <ClinicBottomSheet mode="full"/>
+      </div>
+    ) },
+  'map/nearby-sheet':          { group: 'Mapa', label: 'Clínicas próximas', width: 390, height: 844,
+    render: () => <AndroidDevice width={390} height={844}><MapScreen3_NearbySheet/></AndroidDevice> },
+  'map/route-summary':         { group: 'Mapa', label: 'Rota sugerida · resumo', width: 390, height: 844,
+    render: () => <AndroidDevice width={390} height={844}><MapScreen4_RouteSummary/></AndroidDevice> },
+  'map/route-plan':            { group: 'Mapa', label: 'Planejamento de rota', width: 390, height: 844,
+    render: () => <AndroidDevice width={390} height={844}><MapScreen5_RoutePlan/></AndroidDevice> },
+  'map/route-active':          { group: 'Mapa', label: 'Rota em execução', width: 390, height: 844,
+    render: () => <AndroidDevice width={390} height={844}><MapScreen6_RouteActive/></AndroidDevice> },
+  'map/dynamic-suggestion':    { group: 'Mapa', label: 'Sugestão dinâmica', width: 390, height: 844,
+    render: () => <AndroidDevice width={390} height={844}><MapScreen7_DynamicSuggestion/></AndroidDevice> },
+  'map/near-clinic-prompt':    { group: 'Mapa', label: 'Próximo da clínica', width: 390, height: 844,
+    render: () => <AndroidDevice width={390} height={844}><MapScreen6b_NearClinicPrompt/></AndroidDevice> },
+  'map/visit-in-progress':     { group: 'Mapa', label: 'Visita em andamento', width: 390, height: 844,
+    render: () => <AndroidDevice width={390} height={844}><MapScreen6c_VisitInProgress/></AndroidDevice> },
+  'map/left-location-prompt':  { group: 'Mapa', label: 'Saiu da localização', width: 390, height: 844,
+    render: () => <AndroidDevice width={390} height={844}><MapScreen6d_LeftLocationPrompt/></AndroidDevice> },
+  'map/log-visit':             { group: 'Mapa', label: 'Registrar visita', width: 390, height: 844,
+    render: () => <AndroidDevice width={390} height={844}><MapScreen8_LogVisit/></AndroidDevice> },
+  'map/followups':             { group: 'Mapa', label: 'Follow-ups', width: 390, height: 844,
+    render: () => <AndroidDevice width={390} height={844}><MapScreen9_Followups/></AndroidDevice> },
+  'map/quick-menu':            { group: 'Mapa', label: 'Menu flutuante', width: 390, height: 844,
+    render: () => <AndroidDevice width={390} height={844}><MapScreen10_QuickMenu/></AndroidDevice> },
+  'map/favorites':             { group: 'Mapa', label: 'Favoritos', width: 390, height: 844,
+    render: () => <AndroidDevice width={390} height={844}><MapScreen_Favoritos/></AndroidDevice> },
+
+  // ── Pedidos ───────────────────────────────────────────────────────
+  'pedidos/list':              { group: 'Pedidos', label: 'Meus pedidos', width: 390, height: 844,
+    render: () => <AndroidDevice width={390} height={844}><MeusOrdersScreen/></AndroidDevice> },
+  'pedidos/empty':             { group: 'Pedidos', label: 'Pedidos · vazio', width: 390, height: 844,
+    render: () => <AndroidDevice width={390} height={844}><MeusOrdersScreen emptyState/></AndroidDevice> },
+  'pedidos/detail-transit':    { group: 'Pedidos', label: 'Detalhe · em trânsito', width: 390, height: 844,
+    render: () => <AndroidDevice width={390} height={844}><OrderDetailScreen orderId="PED-2041"/></AndroidDevice> },
+  'pedidos/detail-delivered':  { group: 'Pedidos', label: 'Detalhe · entregue', width: 390, height: 844,
+    render: () => <AndroidDevice width={390} height={844}><OrderDetailScreen orderId="PED-2038"/></AndroidDevice> },
+  'pedidos/products-default':  { group: 'Pedidos', label: 'Novo pedido · produtos', width: 390, height: 844,
+    render: () => <AndroidDevice width={390} height={844}><NewOrderProductsScreen/></AndroidDevice> },
+  'pedidos/products-search':   { group: 'Pedidos', label: 'Novo pedido · busca', width: 390, height: 844,
+    render: () => <AndroidDevice width={390} height={844}><NewOrderProductsScreen searchQuery="atlas"/></AndroidDevice> },
+  'pedidos/products-cart':     { group: 'Pedidos', label: 'Novo pedido · carrinho', width: 390, height: 844,
+    render: () => <AndroidDevice width={390} height={844}><NewOrderProductsScreen cart={SAMPLE_CART}/></AndroidDevice> },
+  'pedidos/cart':              { group: 'Pedidos', label: 'Carrinho · revisão', width: 390, height: 844,
+    render: () => <AndroidDevice width={390} height={844}><CartScreen/></AndroidDevice> },
+  'pedidos/checkout-empty':    { group: 'Pedidos', label: 'Checkout · vazio', width: 390, height: 844,
+    render: () => <AndroidDevice width={390} height={844}><CheckoutScreen/></AndroidDevice> },
+  'pedidos/checkout-filled':   { group: 'Pedidos', label: 'Checkout · preenchido', width: 390, height: 844,
+    render: () => <AndroidDevice width={390} height={844}><CheckoutScreen prefilled/></AndroidDevice> },
+  'pedidos/success':           { group: 'Pedidos', label: 'Pedido confirmado', width: 390, height: 844,
+    render: () => <AndroidDevice width={390} height={844}><OrderSuccessScreen/></AndroidDevice> },
+
+  // ── Apresentações ─────────────────────────────────────────────────
+  'apresentacoes/lib-default': { group: 'Apresentações', label: 'Biblioteca · padrão', width: 390, height: 844,
+    render: () => <AndroidDevice width={390} height={844}><PresentationsLibraryScreen/></AndroidDevice> },
+  'apresentacoes/lib-scroll':  { group: 'Apresentações', label: 'Biblioteca · scroll', width: 390, height: 1400,
+    render: () => <AndroidDevice width={390} height={1400}><PresentationsLibraryScreen/></AndroidDevice> },
+  'apresentacoes/lib-category':{ group: 'Apresentações', label: 'Biblioteca · categoria Produtos', width: 390, height: 844,
+    render: () => <AndroidDevice width={390} height={844}><PresentationsLibraryScreen selectedCategory="Produtos"/></AndroidDevice> },
+  'apresentacoes/search-atlas':{ group: 'Apresentações', label: 'Busca · "atlas"', width: 390, height: 844,
+    render: () => <AndroidDevice width={390} height={844}><PresentationsLibraryScreen searchQuery="atlas"/></AndroidDevice> },
+  'apresentacoes/search-clinico':{ group: 'Apresentações', label: 'Busca · "clínico"', width: 390, height: 844,
+    render: () => <AndroidDevice width={390} height={844}><PresentationsLibraryScreen searchQuery="clínico"/></AndroidDevice> },
+  'apresentacoes/search-empty':{ group: 'Apresentações', label: 'Busca · sem resultados', width: 390, height: 844,
+    render: () => <AndroidDevice width={390} height={844}><PresentationsLibraryScreen searchQuery="xyz123"/></AndroidDevice> },
+  'apresentacoes/detail-default':{ group: 'Apresentações', label: 'Detalhe · pronta para baixar', width: 390, height: 844,
+    render: () => <AndroidDevice width={390} height={844}><PresentationDetailScreen presentationId="pr2"/></AndroidDevice> },
+  'apresentacoes/detail-pdf':  { group: 'Apresentações', label: 'Detalhe · PDF Institucional', width: 390, height: 844,
+    render: () => <AndroidDevice width={390} height={844}><PresentationDetailScreen presentationId="pr1"/></AndroidDevice> },
+  'apresentacoes/detail-downloading':{ group: 'Apresentações', label: 'Detalhe · baixando 42%', width: 390, height: 844,
+    render: () => <AndroidDevice width={390} height={844}><PresentationDetailScreen presentationId="pr2" downloading progress={42}/></AndroidDevice> },
+  'apresentacoes/detail-downloaded':{ group: 'Apresentações', label: 'Detalhe · baixada', width: 390, height: 844,
+    render: () => <AndroidDevice width={390} height={844}><PresentationDetailScreen presentationId="pr2" downloaded/></AndroidDevice> },
+
+  // ── Perfil ────────────────────────────────────────────────────────
+  'perfil/full':               { group: 'Perfil', label: 'Perfil · tela completa', width: 390, height: 1600,
+    render: () => (
+      <div style={{ position:'relative', width:390, height:1600, background:'#f7f8fb', overflow:'hidden' }}>
+        <ProfileScreen/>
+      </div>
+    ) },
+  'perfil/device':             { group: 'Perfil', label: 'Perfil · dispositivo', width: 390, height: 844,
+    render: () => <AndroidDevice width={390} height={844}><ProfileScreen/></AndroidDevice> },
+  'perfil/logout':             { group: 'Perfil', label: 'Perfil · confirmação de sair', width: 390, height: 844,
+    render: () => <AndroidDevice width={390} height={844}><ProfileScreen logoutConfirm/></AndroidDevice> },
+};
+
+// ─── Single-frame renderer ────────────────────────────────────────
+function SingleFrame({ frameId, withChrome }) {
+  const cfg = FRAMES[frameId];
+
+  React.useLayoutEffect(() => {
+    if (!cfg) return;
+    const html = document.documentElement;
+    const body = document.body;
+    html.style.margin = '0'; html.style.padding = '0'; html.style.background = '#fff';
+    body.style.margin = '0'; body.style.padding = '0'; body.style.background = '#fff';
+    body.style.width  = cfg.width + 'px';
+    body.style.height = cfg.height + 'px';
+    body.style.overflow = 'hidden';
+  }, [frameId, cfg]);
+
+  if (!cfg) {
+    return (
+      <div style={{ padding: 32, fontFamily: 'Inter, system-ui' }}>
+        <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>
+          Frame “{frameId}” não encontrado.
+        </div>
+        <div style={{ fontSize: 13, color: '#6b7280', marginBottom: 16 }}>
+          Volte para o índice removendo o parâmetro <code>?frame=...</code>.
+        </div>
+        <a href="?" style={{ color: '#1e40af', fontSize: 13, fontWeight: 600 }}>← Índice</a>
+      </div>
+    );
+  }
+
+  const inner = cfg.render();
+  return (
+    <ThemeCtx.Provider value="dark">
+      <div style={{ position: 'relative', width: cfg.width, height: cfg.height, background: '#fff' }}>
+        {withChrome ? (
+          <AndroidDevice width={cfg.width} height={cfg.height}>
+            <div style={{ position: 'relative', width: '100%', height: '100%' }}>{inner}</div>
+          </AndroidDevice>
+        ) : inner}
+      </div>
+    </ThemeCtx.Provider>
+  );
+}
+
+// ─── Index page (clickable table of contents) ─────────────────────
+function IndexPage() {
+  const groups = {};
+  for (const [id, cfg] of Object.entries(FRAMES)) {
+    if (!groups[cfg.group]) groups[cfg.group] = [];
+    groups[cfg.group].push({ id, ...cfg });
+  }
+  const total = Object.keys(FRAMES).length;
+  const base = window.location.origin + window.location.pathname;
+  const copy = (text) => navigator.clipboard?.writeText(text);
+
+  return (
+    <div style={{
+      minHeight: '100vh', background: '#f0eee9',
+      padding: '48px 32px 80px',
+      fontFamily: 'Inter, system-ui',
+    }}>
+      <div style={{ maxWidth: 880, margin: '0 auto' }}>
+        <div style={{
+          fontSize: 11, fontWeight: 700, letterSpacing: 1.4,
+          textTransform: 'uppercase', color: '#8a94a6', marginBottom: 6,
+        }}>Atlasmed · export</div>
+        <div style={{ fontSize: 28, fontWeight: 700, color: '#0f1729', letterSpacing: -0.4, marginBottom: 8 }}>
+          {total} frames disponíveis para html.to.design
+        </div>
+        <div style={{ fontSize: 14, color: '#6b7280', lineHeight: 1.5, marginBottom: 28, maxWidth: 660 }}>
+          Cada link abaixo renderiza apenas o frame indicado, no tamanho exato do design.
+          Cole a URL no plugin <b>html.to.design</b> dentro do Figma para importar como camadas
+          editáveis. Adicione <code>&chrome=device</code> ao final da URL para envolver em um
+          mockup Android.
+        </div>
+
+        <div style={{
+          padding: '12px 14px', borderRadius: 12,
+          background: '#fff', border: '1px solid #eef0f3',
+          marginBottom: 28, display: 'flex', alignItems: 'center', gap: 12,
+        }}>
+          <button onClick={() => copy(Object.keys(FRAMES).map(id => `${base}?frame=${id}`).join('\n'))} style={{
+            padding: '8px 14px', borderRadius: 10, border: 'none',
+            background: 'linear-gradient(165deg, #0a2f7f, #1e40af)', color: '#fff',
+            fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'Inter, system-ui',
+          }}>Copiar todas as URLs</button>
+          <span style={{ fontSize: 12, color: '#6b7280' }}>
+            Cola uma lista com {total} URLs no clipboard.
+          </span>
+        </div>
+
+        {Object.entries(groups).map(([groupName, items]) => (
+          <div key={groupName} style={{ marginBottom: 36 }}>
+            <div style={{
+              display: 'flex', alignItems: 'baseline', justifyContent: 'space-between',
+              marginBottom: 12, paddingBottom: 8, borderBottom: '1px solid #e5e7eb',
+            }}>
+              <div style={{ fontSize: 18, fontWeight: 700, color: '#0f1729', letterSpacing: -0.2 }}>
+                {groupName}
+              </div>
+              <div style={{ fontSize: 12, color: '#8a94a6', fontVariantNumeric: 'tabular-nums' }}>
+                {items.length} frames
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 4 }}>
+              {items.map(it => {
+                const url = `${base}?frame=${it.id}`;
+                return (
+                  <div key={it.id} style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr auto auto',
+                    gap: 12, alignItems: 'center',
+                    padding: '10px 12px', borderRadius: 10,
+                    background: '#fff', border: '1px solid #eef0f3',
+                  }}>
+                    <div style={{ minWidth: 0 }}>
+                      <a href={`?frame=${it.id}`} target="_blank" rel="noreferrer"
+                        style={{ fontSize: 13.5, fontWeight: 600, color: '#0f1729', textDecoration: 'none' }}>
+                        {it.label}
+                      </a>
+                      <div style={{
+                        fontSize: 11, color: '#6b7280', marginTop: 2,
+                        fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+                        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                      }}>{it.id} · {it.width}×{it.height}</div>
+                    </div>
+                    <button onClick={() => copy(url)} title="Copiar URL"
+                      style={{
+                        padding: '6px 10px', borderRadius: 8, border: '1px solid #eef0f3',
+                        background: '#f7f9fc', color: '#1e40af', fontSize: 11, fontWeight: 600,
+                        cursor: 'pointer', fontFamily: 'Inter, system-ui',
+                      }}>Copiar URL</button>
+                    <a href={`?frame=${it.id}`} target="_blank" rel="noreferrer"
+                      style={{
+                        padding: '6px 10px', borderRadius: 8,
+                        background: 'linear-gradient(165deg, #0a2f7f, #1e40af)', color: '#fff',
+                        fontSize: 11, fontWeight: 700, textDecoration: 'none',
+                      }}>Abrir ↗</a>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── Mount ────────────────────────────────────────────────────────
+function App() {
+  const params = new URLSearchParams(window.location.search);
+  const frameId = params.get('frame');
+  if (frameId) {
+    return <SingleFrame frameId={frameId} withChrome={params.get('chrome') === 'device'}/>;
+  }
+  return <IndexPage/>;
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>

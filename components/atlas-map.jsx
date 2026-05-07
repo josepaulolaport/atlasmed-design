@@ -797,7 +797,7 @@ function ClinicBottomSheet({ mode = 'drawer', initialView = 'detail' }) {
             </SheetSection>
 
             {/* View more — link to full clinic detail screen */}
-            <a href="Atlasmed Login Flow.html#clinic-detail" style={{
+            <a href="index.html#clinic-detail" style={{
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
               margin: '14px 0 10px', padding: '14px 16px',
               borderRadius: 14,

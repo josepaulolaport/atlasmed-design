@@ -257,13 +257,21 @@ function PreFilledForgot({ step, platform, codeError = false }) {
 // ═══════════════════════════════════════════════════════════════════════════════
 // PAGE 1 — Desempenho (BI)
 // ═══════════════════════════════════════════════════════════════════════════════
+
+const BI_SECTION_FRAMES = [
+  { view: { type: 'activity' },                                    id: 'bi-activity',     label: 'Atividade · análise',          height: 844  },
+  { view: { type: 'data-quality' },                                id: 'bi-data-quality', label: 'Corrigir cadastros · lista',   height: 844  },
+  { view: { type: 'data-quality-detail', entityId: 'card-pinh' },  id: 'bi-dq-clinic',    label: 'Corrigir cadastro · clínica',  height: 1100 },
+  { view: { type: 'data-quality-detail', entityId: 'dr-bento' },   id: 'bi-dq-doctor',    label: 'Corrigir cadastro · médico',   height: 1100 },
+];
+
 function BIApp() {
   return (
     <DesignCanvas>
       <DCSection id="bi-main"
         title="Desempenho — visão do representante"
         subtitle="Snapshot, funil, oportunidades, conversão, cobertura, insights e recomendações em uma só tela.">
-        <DCArtboard id="bi-full" label="Tela completa · rolagem" width={390} height={3200}>
+        <DCArtboard id="bi-full" label="Tela completa · rolagem" width={390} height={1770}>
           <div style={{ position: 'absolute', inset: 0, background: '#f7f8fb', overflow: 'hidden' }}>
             <BIScreen/>
           </div>
@@ -273,6 +281,63 @@ function BIApp() {
             <BIScreen/>
           </AndroidDevice>
         </DCArtboard>
+      </DCSection>
+
+      <DCSection id="bi-comercial"
+        title="Desempenho Comercial · uma só tela"
+        subtitle="Substitui as três telas separadas (Receita · Pedidos · Ticket médio). Uma tela focada para o vendedor de campo: um KPI ativo por vez, gráfico de linha com agregado acumulado dentro do período, scrub interativo, métricas relacionadas em baixo-relevo e um feed cronológico que explica o que moveu o número. Ao tocar em um pedido do feed, o usuário cai na tela de Resumo do pedido ao lado.">
+        <DCArtboard id="bi-comercial" label="Desempenho Comercial · tela completa" width={390} height={1880}>
+          <AndroidDevice width={390} height={1880}>
+            <BIScreen initialView={{ type: 'comercial', kpi: 'receita' }}/>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="bi-order-quick" label="Resumo do pedido · #PED-2841" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <BIScreen initialView={{ type: 'order-quick-view', orderId: 'PED-2841' }}/>
+          </AndroidDevice>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="bi-atividade"
+        title="Desempenho · Atividade · uma só tela"
+        subtitle="Substitui as quatro telas separadas (Visitas hoje · Visitas na semana · Follow-ups · Novas clínicas). Tela focada em Visitas, com Follow-ups e Novas clínicas como cards compactos clicáveis no topo — cada um leva a uma sub-tela com lista completa, busca, filtros e ordenação.">
+        <DCArtboard id="bi-atividade" label="Desempenho · Atividade · tela completa" width={390} height={2080}>
+          <AndroidDevice width={390} height={2080}>
+            <BIScreen initialView={{ type: 'atividade' }}/>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="bi-atividade-followups" label="Follow-ups · sub-tela" width={390} height={1100}>
+          <AndroidDevice width={390} height={1100}>
+            <BIScreen initialView={{ type: 'atividade-followups' }}/>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="bi-atividade-novas" label="Novas clínicas · sub-tela" width={390} height={1100}>
+          <AndroidDevice width={390} height={1100}>
+            <BIScreen initialView={{ type: 'atividade-novas' }}/>
+          </AndroidDevice>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="bi-status"
+        title="Status das clínicas · uma só tela"
+        subtitle="Substitui as cinco telas separadas (Sem interação · Em negociação · Ativa · Em risco · Rejeição) por uma só. Cobertura de território no topo, busca + filtros + ordenação para a lista combinada de clínicas, com o status de cada uma sinalizado por cor e tag.">
+        <DCArtboard id="bi-status" label="Status das clínicas · tela completa" width={390} height={1500}>
+          <AndroidDevice width={390} height={1500}>
+            <BIScreen initialView={{ type: 'clinic-status' }}/>
+          </AndroidDevice>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="bi-destinos"
+        title="Demais destinos"
+        subtitle="Atividade (CTA da Meta combinada) e Qualidade dos dados — lista de cadastros incompletos com a sub-tela de correção que abre ao tocar em uma clínica ou médico da lista.">
+        {BI_SECTION_FRAMES.map(f => (
+          <DCArtboard key={f.id} id={f.id} label={f.label} width={390} height={f.height || 844}>
+            <AndroidDevice width={390} height={f.height || 844}>
+              <BIScreen initialView={f.view}/>
+            </AndroidDevice>
+          </DCArtboard>
+        ))}
       </DCSection>
     </DesignCanvas>
   );
