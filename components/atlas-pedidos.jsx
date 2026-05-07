@@ -172,14 +172,23 @@ function CartBadge({ cart, onClick }) {
   );
 }
 
-function SelectorField({ label, value, placeholder }) {
+function SelectorField({ label, value, placeholder, onClick, disabled = false }) {
   return (
-    <div style={{
-      border: '1px solid #eef0f3', borderRadius: 12,
-      background: '#fff', padding: '11px 14px',
-      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      cursor: 'pointer',
-    }}>
+    <button
+      type="button"
+      onClick={disabled ? undefined : onClick}
+      disabled={disabled}
+      style={{
+        width: '100%', textAlign: 'left',
+        border: '1px solid #eef0f3', borderRadius: 12,
+        background: disabled ? '#f7f8fb' : '#fff',
+        padding: '11px 14px',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        opacity: disabled ? 0.7 : 1,
+        fontFamily: 'Inter, system-ui',
+      }}
+    >
       <div>
         <div style={{
           fontSize: 10, color: '#9ca3af', fontWeight: 600,
@@ -192,7 +201,7 @@ function SelectorField({ label, value, placeholder }) {
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#c4c9d2" strokeWidth="1.7" strokeLinecap="round">
         <path d="M4 6l4 4 4-4"/>
       </svg>
-    </div>
+    </button>
   );
 }
 
@@ -669,7 +678,16 @@ function OrderDetailScreen({ orderId = 'PED-2041' }) {
 }
 
 // ─── Screen 2: Novo Pedido — Produtos ────────────────────────────────────────
-function NewOrderProductsScreen({ cart = [], searchQuery = '', selectedCategory = 'Todos' }) {
+function NewOrderProductsScreen({
+  cart = [],
+  searchQuery = '',
+  selectedCategory = 'Todos',
+  clinic = null,
+  initialSheetProductId = null,
+  initialSheetMode = null,
+  initialSheetUnit = null,
+  initialSheetQty = 0,
+}) {
   const categories = ['Todos', 'Ortopedia', 'Dermatologia', 'Cardiologia', 'Diagnóstico', 'Suplementação'];
 
   const filtered = PEDIDO_PRODUCTS.filter(p => {
@@ -679,6 +697,11 @@ function NewOrderProductsScreen({ cart = [], searchQuery = '', selectedCategory 
       p.sub.toLowerCase().includes(searchQuery.toLowerCase());
     return matchCat && matchQ;
   });
+
+  const [sheetProductId, setSheetProductId] = React.useState(initialSheetProductId);
+  const sheetProduct = sheetProductId
+    ? PEDIDO_PRODUCTS.find(p => p.id === sheetProductId)
+    : null;
 
   const totalQty = cart.reduce((s, i) => s + i.qty, 0);
 
@@ -699,6 +722,24 @@ function NewOrderProductsScreen({ cart = [], searchQuery = '', selectedCategory 
           </div>
           <CartBadge cart={cart} onClick={() => {}}/>
         </div>
+
+        {/* Clinic context strip — shows the destination so suggested prices have meaning */}
+        {clinic && (
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 9,
+            padding: '8px 11px', borderRadius: 10,
+            background: '#eef2ff',
+            border: '1px solid rgba(10,47,127,0.10)',
+            marginBottom: 10,
+          }}>
+            <span style={{ fontSize: 14 }}>🏥</span>
+            <div style={{ flex: 1, fontSize: 11.5, lineHeight: 1.35, minWidth: 0 }}>
+              <span style={{ color: '#6b7280' }}>Pedido para · </span>
+              <span style={{ color: '#0a2f7f', fontWeight: 700 }}>{clinic.name}</span>
+            </div>
+            <span style={{ fontSize: 10.5, color: '#0a2f7f', fontWeight: 600 }}>Trocar</span>
+          </div>
+        )}
 
         {/* Search bar */}
         <div style={{
@@ -749,29 +790,79 @@ function NewOrderProductsScreen({ cart = [], searchQuery = '', selectedCategory 
             {filtered.map(product => {
               const cartItem = cart.find(c => c.id === product.id);
               const qty = cartItem ? cartItem.qty : 0;
+              const lineUnit = cartItem?.unit ?? product.unit;
+              const hasHistory = clinic && window.getSuggestedPrice
+                ? !!window.getSuggestedPrice(clinic.id, product.id, product.unit)
+                : false;
               return (
-                <div key={product.id} style={{
-                  background: '#fff',
-                  border: `1.5px solid ${qty > 0 ? 'rgba(10,47,127,0.22)' : '#eef0f3'}`,
-                  borderRadius: 12, padding: '12px 12px 12px 14px',
-                  display: 'flex', alignItems: 'center', gap: 12,
-                  boxShadow: qty > 0 ? '0 0 0 3px rgba(10,47,127,0.05)' : 'none',
-                }}>
+                <button
+                  key={product.id}
+                  onClick={() => setSheetProductId(product.id)}
+                  style={{
+                    all: 'unset', cursor: 'pointer',
+                    background: '#fff',
+                    border: `1.5px solid ${qty > 0 ? 'rgba(10,47,127,0.22)' : '#eef0f3'}`,
+                    borderRadius: 12, padding: '12px 12px 12px 14px',
+                    display: 'flex', alignItems: 'center', gap: 12,
+                    boxShadow: qty > 0 ? '0 0 0 3px rgba(10,47,127,0.05)' : 'none',
+                    boxSizing: 'border-box',
+                  }}>
                   <ProductIcon name={product.name}/>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
                       <span style={{ fontSize: 14, fontWeight: 600, color: '#1f2937' }}>{product.name}</span>
                       <PTag tag={product.tag}/>
+                      {hasHistory && qty === 0 && (
+                        <span style={{
+                          padding: '1px 6px', borderRadius: 5,
+                          background: '#e7f6ef', color: '#0f7c5a',
+                          fontSize: 9, fontWeight: 700,
+                          textTransform: 'uppercase', letterSpacing: 0.4,
+                        }}>histórico</span>
+                      )}
                     </div>
                     <div style={{ fontSize: 11.5, color: '#6b7280', marginBottom: 4, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {product.sub}
                     </div>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: '#0a2f7f' }}>
-                      {brl(product.unit)}
+                    <div style={{ display: 'inline-flex', alignItems: 'baseline', gap: 7 }}>
+                      <span style={{
+                        fontSize: 13, fontWeight: 700,
+                        color: qty > 0 && lineUnit !== product.unit ? '#0f7c5a' : '#0a2f7f',
+                        fontVariantNumeric: 'tabular-nums',
+                      }}>
+                        {brl(lineUnit)}
+                      </span>
+                      {qty > 0 && lineUnit !== product.unit && (
+                        <span style={{
+                          fontSize: 11, color: '#9ca3af',
+                          textDecoration: 'line-through',
+                          fontVariantNumeric: 'tabular-nums',
+                        }}>{brl(product.unit)}</span>
+                      )}
                     </div>
                   </div>
-                  <Stepper value={qty} onChange={() => {}}/>
-                </div>
+                  {qty > 0 ? (
+                    <div style={{
+                      padding: '7px 12px', borderRadius: 10,
+                      background: '#eef2ff', color: '#0a2f7f',
+                      fontSize: 12, fontWeight: 700,
+                      fontVariantNumeric: 'tabular-nums',
+                      display: 'inline-flex', alignItems: 'center', gap: 5,
+                    }}>
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M2 5.5l2 2 6-6"/>
+                      </svg>
+                      {qty}× no carrinho
+                    </div>
+                  ) : (
+                    <div style={{
+                      width: 36, height: 36, borderRadius: 10,
+                      background: '#0a2f7f', color: '#fff',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: 18, lineHeight: 1, fontWeight: 700, flexShrink: 0,
+                    }}>+</div>
+                  )}
+                </button>
               );
             })}
           </div>
@@ -793,6 +884,24 @@ function NewOrderProductsScreen({ cart = [], searchQuery = '', selectedCategory 
             </svg>
           </button>
         </div>
+      )}
+
+      {/* Product order sheet — opens on product tap */}
+      {sheetProduct && window.ProductOrderSheet && (
+        <window.ProductOrderSheet
+          open={true}
+          onClose={() => setSheetProductId(null)}
+          onConfirm={() => setSheetProductId(null)}
+          product={sheetProduct}
+          clinic={clinic}
+          initialQty={
+            initialSheetProductId === sheetProductId && initialSheetQty
+              ? initialSheetQty
+              : (cart.find(c => c.id === sheetProductId)?.qty || 0)
+          }
+          initialUnit={initialSheetProductId === sheetProductId ? initialSheetUnit : null}
+          initialMode={initialSheetProductId === sheetProductId ? initialSheetMode : null}
+        />
       )}
     </div>
   );
@@ -888,13 +997,43 @@ function CartScreen({ cart = SAMPLE_CART }) {
 }
 
 // ─── Screen 4: Checkout ───────────────────────────────────────────────────────
-function CheckoutScreen({ prefilled = false, cart = SAMPLE_CART }) {
+function CheckoutScreen({
+  prefilled = false,
+  cart = SAMPLE_CART,
+  initialClinicSheet = false,
+  initialDoctorSheet = false,
+}) {
+  const _seedClinic = prefilled
+    ? (window.MOCK_CLINICS_FOR_SELECTOR || []).find(c => c.id === 'c-0')
+        || { id: 'c-0', name: 'Clínica Santa Mônica' }
+    : null;
+  const _seedDoctor = prefilled
+    ? (window.MOCK_DOCTORS_FOR_SELECTOR || []).find(d => d.id === 'd-0')
+        || { id: 'd-0', name: 'Dra. Mariana Silva' }
+    : null;
+
+  const [selectedClinic, setSelectedClinic] = React.useState(_seedClinic);
+  const [selectedDoctor, setSelectedDoctor] = React.useState(_seedDoctor);
+  const [clinicSheetOpen, setClinicSheetOpen] = React.useState(initialClinicSheet);
+  const [doctorSheetOpen, setDoctorSheetOpen] = React.useState(initialDoctorSheet);
+
+  // Each cart item carries its agreed unit price (set in the product modal).
+  // Falls back to the catalog price for items that were added without a custom price.
   const items = cart
-    .map(c => ({ ...c, product: PEDIDO_PRODUCTS.find(p => p.id === c.id) }))
-    .filter(c => c.product);
-  const subtotal = items.reduce((s, i) => s + i.product.unit * i.qty, 0);
-  const clinic  = prefilled ? 'Clínica Santa Mônica' : '';
-  const doctor  = prefilled ? 'Dra. Mariana Silva'   : '';
+    .map(c => {
+      const product = PEDIDO_PRODUCTS.find(p => p.id === c.id);
+      if (!product) return null;
+      const unit = c.unit ?? product.unit;
+      return { ...c, product, unit };
+    })
+    .filter(Boolean);
+  const subtotal = items.reduce((s, i) => s + i.unit * i.qty, 0);
+  const catalogTotal = items.reduce((s, i) => s + i.product.unit * i.qty, 0);
+  const savings = catalogTotal - subtotal;
+
+  const clinic = selectedClinic?.name || '';
+  const doctor = selectedDoctor?.name || '';
+  const isReady = !!selectedClinic && !!selectedDoctor;
 
   return (
     <div style={{
@@ -947,8 +1086,17 @@ function CheckoutScreen({ prefilled = false, cart = SAMPLE_CART }) {
         <div style={{ marginBottom: 16 }}>
           <div style={{ fontSize: 12, fontWeight: 600, color: '#374151', marginBottom: 8, letterSpacing: 0.2 }}>Para quem?</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <SelectorField label="Clínica" value={clinic} placeholder="Selecionar clínica…"/>
-            <SelectorField label="Médico responsável" value={doctor} placeholder="Selecionar médico…"/>
+            <SelectorField
+              label="Clínica" value={clinic}
+              placeholder="Selecionar clínica…"
+              onClick={() => setClinicSheetOpen(true)}
+            />
+            <SelectorField
+              label="Médico responsável" value={doctor}
+              placeholder={selectedClinic ? 'Selecionar médico…' : 'Selecione a clínica primeiro'}
+              onClick={() => selectedClinic && setDoctorSheetOpen(true)}
+              disabled={!selectedClinic}
+            />
           </div>
         </div>
 
@@ -957,30 +1105,58 @@ function CheckoutScreen({ prefilled = false, cart = SAMPLE_CART }) {
           background: '#fff', border: '1px solid #eef0f3', borderRadius: 14,
           padding: 16, marginBottom: 12,
         }}>
-          <div style={{ fontSize: 12, fontWeight: 600, color: '#374151', marginBottom: 12, letterSpacing: 0.2 }}>Itens do pedido</div>
-          {items.map(item => (
-            <div key={item.id} style={{
-              display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10,
-            }}>
-              <ProductIcon name={item.product.name} size={32}/>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 13, fontWeight: 500, color: '#1f2937' }}>{item.product.name}</div>
-                <div style={{ fontSize: 11, color: '#9ca3af' }}>{item.product.sub}</div>
-              </div>
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ fontSize: 11, color: '#9ca3af' }}>× {item.qty}</div>
-                <div style={{ fontSize: 13, fontWeight: 600, color: '#374151' }}>
-                  {brl(item.product.unit * item.qty)}
+          <div style={{ fontSize: 12, fontWeight: 600, color: '#374151', marginBottom: 12, letterSpacing: 0.2 }}>
+            Itens do pedido
+          </div>
+          {items.map(item => {
+            const isNegotiated = item.product.unit !== item.unit;
+            return (
+              <div key={item.id} style={{
+                display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10,
+              }}>
+                <ProductIcon name={item.product.name} size={32}/>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 13, fontWeight: 500, color: '#1f2937' }}>{item.product.name}</div>
+                  <div style={{ fontSize: 11, color: '#9ca3af' }}>{item.product.sub}</div>
+                </div>
+                <div style={{ textAlign: 'right', minWidth: 84 }}>
+                  <div style={{ fontSize: 11, color: '#9ca3af' }}>× {item.qty}</div>
+                  {isNegotiated && (
+                    <div style={{
+                      fontSize: 10.5, color: '#9ca3af',
+                      textDecoration: 'line-through',
+                      fontVariantNumeric: 'tabular-nums',
+                    }}>
+                      {brl(item.product.unit * item.qty)}
+                    </div>
+                  )}
+                  <div style={{
+                    fontSize: 13, fontWeight: 700,
+                    color: isNegotiated ? '#0f7c5a' : '#374151',
+                    fontVariantNumeric: 'tabular-nums',
+                  }}>
+                    {brl(item.unit * item.qty)}
+                  </div>
                 </div>
               </div>
+            );
+          })}
+          {savings > 0 && (
+            <div style={{
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              paddingTop: 10, marginTop: 4,
+              fontSize: 12, color: '#0f7c5a',
+            }}>
+              <span>Economia vs tabela</span>
+              <span style={{ fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>−{brl(savings)}</span>
             </div>
-          ))}
+          )}
           <div style={{
             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-            paddingTop: 11, borderTop: '1px solid #f1f3f6',
+            paddingTop: 11, marginTop: 4, borderTop: '1px solid #f1f3f6',
           }}>
             <span style={{ fontSize: 15, fontWeight: 700, color: '#1f2937' }}>Total</span>
-            <span style={{ fontSize: 15, fontWeight: 700, color: '#0a2f7f' }}>{brl(subtotal)}</span>
+            <span style={{ fontSize: 15, fontWeight: 700, color: '#0a2f7f', fontVariantNumeric: 'tabular-nums' }}>{brl(subtotal)}</span>
           </div>
         </div>
 
@@ -1005,20 +1181,44 @@ function CheckoutScreen({ prefilled = false, cart = SAMPLE_CART }) {
       <div style={{ padding: '0 16px 28px', flexShrink: 0 }}>
         <button style={{
           width: '100%', height: 50, borderRadius: 14,
-          background: prefilled ? '#0a2f7f' : 'rgba(10,47,127,0.28)',
+          background: isReady ? '#0a2f7f' : 'rgba(10,47,127,0.28)',
           color: '#fff', border: 'none',
           fontSize: 15, fontWeight: 600,
-          cursor: prefilled ? 'pointer' : 'default',
+          cursor: isReady ? 'pointer' : 'default',
           transition: 'background 200ms',
         }}>
           Confirmar pedido
         </button>
-        {!prefilled && (
+        {!isReady && (
           <div style={{ textAlign: 'center', marginTop: 8, fontSize: 12, color: '#9ca3af' }}>
             Selecione clínica e médico para continuar
           </div>
         )}
       </div>
+
+      {/* Clinic selector sheet */}
+      <ClinicSelectorSheet
+        open={clinicSheetOpen}
+        onClose={() => setClinicSheetOpen(false)}
+        onSelect={(c) => {
+          setSelectedClinic(c);
+          if (selectedDoctor && !c.id) return;
+          if (selectedDoctor && Array.isArray(selectedDoctor.clinics)
+              && !selectedDoctor.clinics.includes(c.id)) {
+            setSelectedDoctor(null);
+          }
+        }}
+        preSelected={selectedClinic}
+      />
+
+      {/* Doctor selector sheet */}
+      <DoctorSelectorSheet
+        open={doctorSheetOpen}
+        onClose={() => setDoctorSheetOpen(false)}
+        onSelect={(d) => setSelectedDoctor(d)}
+        selectedClinic={selectedClinic}
+        preSelected={selectedDoctor}
+      />
     </div>
   );
 }

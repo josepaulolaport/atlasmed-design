@@ -339,50 +339,106 @@ function PencilIcon({ size = 12, color = 'currentColor' }) {
   );
 }
 
-function EditPencilButton({ onClick, title = 'Sugerir edição' }) {
+function EditPencilButton({
+  onClick, title = 'Sugerir edição',
+  fieldKey = 'clinicPhone',
+  currentValue = '—',
+  entityType = 'clinic',
+  entityId = 'c-0',
+  entityName = '',
+}) {
+  const [open, setOpen] = React.useState(false);
   return (
-    <button
-      aria-label={title}
-      onClick={onClick}
-      style={{
-        width: 22, height: 22, borderRadius: 11,
-        background: 'transparent', border: 'none', cursor: 'pointer',
-        display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-        color: '#8a94a6', padding: 0, flexShrink: 0,
-      }}
-    >
-      <PencilIcon/>
-    </button>
+    <>
+      <button
+        aria-label={title}
+        onClick={(e) => {
+          if (e?.stopPropagation) e.stopPropagation();
+          if (onClick) onClick(e);
+          setOpen(true);
+        }}
+        style={{
+          width: 22, height: 22, borderRadius: 11,
+          background: 'transparent', border: 'none', cursor: 'pointer',
+          display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+          color: '#8a94a6', padding: 0, flexShrink: 0,
+        }}
+      >
+        <PencilIcon/>
+      </button>
+      <EditSuggestionModal
+        open={open}
+        onClose={() => setOpen(false)}
+        fieldKey={fieldKey}
+        currentValue={currentValue}
+        entityType={entityType}
+        entityId={entityId}
+        entityName={entityName}
+      />
+    </>
   );
 }
 
-function EmptyChip({ label = 'Completar', onClick }) {
+function EmptyChip({
+  label = 'Completar', onClick,
+  fieldKey = 'clinicPhone',
+  entityType = 'clinic',
+  entityId = 'c-0',
+  entityName = '',
+}) {
+  const [open, setOpen] = React.useState(false);
   return (
-    <button
-      onClick={onClick}
-      style={{
-        display: 'inline-flex', alignItems: 'center', gap: 5,
-        padding: '3px 9px', borderRadius: 999,
-        background: 'rgba(198,134,27,0.12)',
-        border: '1px dashed #c6861b',
-        color: '#8a5a0f', fontSize: 11, fontWeight: 700, letterSpacing: 0.2,
-        cursor: 'pointer', fontFamily: 'Inter, system-ui',
-      }}
-    >
-      <span style={{ fontSize: 12, lineHeight: 0.8, fontWeight: 700 }}>+</span>
-      {label}
-    </button>
+    <>
+      <button
+        onClick={(e) => {
+          if (e?.stopPropagation) e.stopPropagation();
+          if (onClick) onClick(e);
+          setOpen(true);
+        }}
+        style={{
+          display: 'inline-flex', alignItems: 'center', gap: 5,
+          padding: '3px 9px', borderRadius: 999,
+          background: 'rgba(198,134,27,0.12)',
+          border: '1px dashed #c6861b',
+          color: '#8a5a0f', fontSize: 11, fontWeight: 700, letterSpacing: 0.2,
+          cursor: 'pointer', fontFamily: 'Inter, system-ui',
+        }}
+      >
+        <span style={{ fontSize: 12, lineHeight: 0.8, fontWeight: 700 }}>+</span>
+        {label}
+      </button>
+      <EditSuggestionModal
+        open={open}
+        onClose={() => setOpen(false)}
+        fieldKey={fieldKey}
+        currentValue="—"
+        entityType={entityType}
+        entityId={entityId}
+        entityName={entityName}
+      />
+    </>
   );
 }
 
 // Inline wrapper: shows value + pencil, or a "Completar" chip if empty.
 // `isEmpty(val)` is customizable (default: falsy or '—' / '-').
-function Editable({ value, mono = false, placeholder = 'Completar', style = {}, valueStyle = {} }) {
+function Editable({
+  value, mono = false, placeholder = 'Completar',
+  style = {}, valueStyle = {},
+  fieldKey = 'clinicPhone',
+  entityType = 'clinic',
+  entityId = 'c-0',
+  entityName = '',
+}) {
   const empty = !value || value === '—' || value === '-';
   if (empty) {
     return (
       <span style={{ display: 'inline-flex', ...style }}>
-        <EmptyChip label={placeholder}/>
+        <EmptyChip
+          label={placeholder}
+          fieldKey={fieldKey} entityType={entityType}
+          entityId={entityId} entityName={entityName}
+        />
       </span>
     );
   }
@@ -397,7 +453,10 @@ function Editable({ value, mono = false, placeholder = 'Completar', style = {}, 
         fontVariantNumeric: mono ? 'tabular-nums' : 'normal',
         ...valueStyle,
       }}>{value}</span>
-      <EditPencilButton/>
+      <EditPencilButton
+        fieldKey={fieldKey} currentValue={value}
+        entityType={entityType} entityId={entityId} entityName={entityName}
+      />
     </span>
   );
 }
@@ -442,16 +501,20 @@ function SuggestEditBanner() {
 // Fotos — compact tap-through row that replaces the inline gallery.
 // Stacked thumbnails + meta + chevron.
 // ─────────────────────────────────────────────────────────────
-function PhotosButton({ gallery = [], title = 'Fotos', subtitle }) {
+function PhotosButton({ gallery = [], title = 'Fotos', subtitle, initialOpen = false }) {
   const preview = gallery.slice(0, 3);
   const last = gallery[0];
+  const [galleryOpen, setGalleryOpen] = React.useState(initialOpen);
   return (
     <div style={{ margin: '16px 16px 0' }}>
-      <button style={{
+      <button
+        onClick={() => gallery.length > 0 && setGalleryOpen(true)}
+        style={{
         width: '100%', padding: '12px 14px',
         display: 'flex', alignItems: 'center', gap: 14,
         background: '#fff', border: '1px solid #edeff3', borderRadius: 14,
-        cursor: 'pointer', fontFamily: 'Inter, system-ui', textAlign: 'left',
+        cursor: gallery.length > 0 ? 'pointer' : 'default',
+        fontFamily: 'Inter, system-ui', textAlign: 'left',
         boxShadow: '0 1px 2px rgba(15,23,41,0.03)',
       }}>
         {/* stacked thumbs */}
@@ -497,6 +560,12 @@ function PhotosButton({ gallery = [], title = 'Fotos', subtitle }) {
           <path d="M6 3l5 5-5 5"/>
         </svg>
       </button>
+      <PhotoGalleryViewer
+        open={galleryOpen}
+        onClose={() => setGalleryOpen(false)}
+        photos={gallery}
+        title={title}
+      />
     </div>
   );
 }

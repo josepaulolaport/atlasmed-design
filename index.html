@@ -14,6 +14,20 @@
   ::-webkit-scrollbar { display: none; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
+  /* ── Modal / sheet animations (Phase 1) ── */
+  @keyframes atlasFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes atlasSlideUp {
+    from { transform: translateY(100%); }
+    to   { transform: translateY(0); }
+  }
+  @keyframes atlasSlideDown {
+    from { transform: translate(-50%, -120%); opacity: 0; }
+    to   { transform: translate(-50%, 0);     opacity: 1; }
+  }
+
   /* ── Top navigation bar ── */
   #design-nav {
     position: fixed; top: 0; left: 0; right: 0; z-index: 9999;
@@ -146,6 +160,11 @@
 <script type="text/babel" src="components/atlas-data.jsx"></script>
 <script type="text/babel" src="components/atlas-screens.jsx"></script>
 <script type="text/babel" src="components/atlas-flow.jsx"></script>
+<!-- Phase 1 modals & sheets — must load before screens that wire them up -->
+<script type="text/babel" src="components/clinic-selector.jsx"></script>
+<script type="text/babel" src="components/doctor-selector.jsx"></script>
+<script type="text/babel" src="components/edit-suggestion-modal.jsx"></script>
+<script type="text/babel" src="components/photo-gallery-viewer.jsx"></script>
 <script type="text/babel" src="components/atlas-list.jsx"></script>
 <script type="text/babel" src="components/atlas-clinic.jsx"></script>
 <script type="text/babel" src="components/atlas-doctor.jsx"></script>
@@ -154,6 +173,19 @@
 <script type="text/babel" src="components/atlas-pedidos.jsx"></script>
 <script type="text/babel" src="components/atlas-presentations.jsx"></script>
 <script type="text/babel" src="components/atlas-profile.jsx"></script>
+<!-- Phase 2 screens & sheets — load after detail screens they overlay -->
+<script type="text/babel" src="components/visit-history-full.jsx"></script>
+<script type="text/babel" src="components/products-full-list.jsx"></script>
+<script type="text/babel" src="components/work-hours-editor.jsx"></script>
+<script type="text/babel" src="components/profile-editor.jsx"></script>
+<!-- Phase 3 screens & sheets — complete experience -->
+<script type="text/babel" src="components/atlas-activity-full.jsx"></script>
+<script type="text/babel" src="components/atlas-help.jsx"></script>
+<script type="text/babel" src="components/atlas-legal.jsx"></script>
+<script type="text/babel" src="components/atlas-presentation-filters.jsx"></script>
+<script type="text/babel" src="components/atlas-order-suggested-price.jsx"></script>
+<script type="text/babel" src="components/atlas-product-order-sheet.jsx"></script>
+<script type="text/babel" src="components/atlas-presentation-viewer.jsx"></script>
 
 <!-- Combined App -->
 <script type="text/babel">
@@ -259,7 +291,6 @@ function PreFilledForgot({ step, platform, codeError = false }) {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 const BI_SECTION_FRAMES = [
-  { view: { type: 'activity' },                                    id: 'bi-activity',     label: 'Atividade · análise',          height: 844  },
   { view: { type: 'data-quality' },                                id: 'bi-data-quality', label: 'Corrigir cadastros · lista',   height: 844  },
   { view: { type: 'data-quality-detail', entityId: 'card-pinh' },  id: 'bi-dq-clinic',    label: 'Corrigir cadastro · clínica',  height: 1100 },
   { view: { type: 'data-quality-detail', entityId: 'dr-bento' },   id: 'bi-dq-doctor',    label: 'Corrigir cadastro · médico',   height: 1100 },
@@ -269,43 +300,38 @@ function BIApp() {
   return (
     <DesignCanvas>
       <DCSection id="bi-main"
-        title="Desempenho — visão do representante"
-        subtitle="Snapshot, funil, oportunidades, conversão, cobertura, insights e recomendações em uma só tela.">
-        <DCArtboard id="bi-full" label="Tela completa · rolagem" width={390} height={1770}>
-          <div style={{ position: 'absolute', inset: 0, background: '#f7f8fb', overflow: 'hidden' }}>
-            <BIScreen/>
-          </div>
-        </DCArtboard>
+        title="1 · Desempenho · visão geral"
+        subtitle="Tela inicial do app. Concentra resumo comercial, meta da semana, atividades recentes, território, conversão e qualidade dos dados em uma única tela — tudo o que o representante precisa ver ao abrir o app.">
         <DCArtboard id="bi-device" label="Dispositivo · topo" width={390} height={844}>
           <AndroidDevice width={390} height={844}>
             <BIScreen/>
           </AndroidDevice>
         </DCArtboard>
+        <DCArtboard id="bi-full" label="Tela completa · rolagem" width={390} height={1770}>
+          <div style={{ position: 'absolute', inset: 0, background: '#f7f8fb', overflow: 'hidden' }}>
+            <BIScreen/>
+          </div>
+        </DCArtboard>
       </DCSection>
 
       <DCSection id="bi-comercial"
-        title="Desempenho Comercial · uma só tela"
-        subtitle="Substitui as três telas separadas (Receita · Pedidos · Ticket médio). Uma tela focada para o vendedor de campo: um KPI ativo por vez, gráfico de linha com agregado acumulado dentro do período, scrub interativo, métricas relacionadas em baixo-relevo e um feed cronológico que explica o que moveu o número. Ao tocar em um pedido do feed, o usuário cai na tela de Resumo do pedido ao lado.">
-        <DCArtboard id="bi-comercial" label="Desempenho Comercial · tela completa" width={390} height={1880}>
-          <AndroidDevice width={390} height={1880}>
-            <BIScreen initialView={{ type: 'comercial', kpi: 'receita' }}/>
-          </AndroidDevice>
-        </DCArtboard>
+        title="2 · Desempenho comercial"
+        subtitle="Substitui as três telas separadas (Receita · Pedidos · Ticket médio) por uma só, focada para o representante de campo. Um KPI ativo por vez, gráfico de linha interativo, métricas relacionadas em baixo-relevo e um feed cronológico que explica o que moveu o número. Ao tocar em um pedido do feed, abre o resumo do pedido.">
         <DCArtboard id="bi-order-quick" label="Resumo do pedido · #PED-2841" width={390} height={844}>
           <AndroidDevice width={390} height={844}>
             <BIScreen initialView={{ type: 'order-quick-view', orderId: 'PED-2841' }}/>
           </AndroidDevice>
         </DCArtboard>
+        <DCArtboard id="bi-comercial" label="Tela completa · rolagem" width={390} height={1880}>
+          <AndroidDevice width={390} height={1880}>
+            <BIScreen initialView={{ type: 'comercial', kpi: 'receita' }}/>
+          </AndroidDevice>
+        </DCArtboard>
       </DCSection>
 
       <DCSection id="bi-atividade"
-        title="Desempenho · Atividade · uma só tela"
-        subtitle="Substitui as quatro telas separadas (Visitas hoje · Visitas na semana · Follow-ups · Novas clínicas). Tela focada em Visitas, com Follow-ups e Novas clínicas como cards compactos clicáveis no topo — cada um leva a uma sub-tela com lista completa, busca, filtros e ordenação.">
-        <DCArtboard id="bi-atividade" label="Desempenho · Atividade · tela completa" width={390} height={2080}>
-          <AndroidDevice width={390} height={2080}>
-            <BIScreen initialView={{ type: 'atividade' }}/>
-          </AndroidDevice>
-        </DCArtboard>
+        title="3 · Atividade"
+        subtitle="Substitui quatro telas (Visitas hoje · Visitas na semana · Follow-ups · Novas clínicas) por uma só, focada em Visitas. Follow-ups e Novas clínicas aparecem como cards clicáveis que levam à sub-tela de cada um, com lista completa, busca, filtros e ordenação.">
         <DCArtboard id="bi-atividade-followups" label="Follow-ups · sub-tela" width={390} height={1100}>
           <AndroidDevice width={390} height={1100}>
             <BIScreen initialView={{ type: 'atividade-followups' }}/>
@@ -316,21 +342,81 @@ function BIApp() {
             <BIScreen initialView={{ type: 'atividade-novas' }}/>
           </AndroidDevice>
         </DCArtboard>
+        <DCArtboard id="bi-atividade" label="Tela completa · rolagem" width={390} height={2080}>
+          <AndroidDevice width={390} height={2080}>
+            <BIScreen initialView={{ type: 'atividade' }}/>
+          </AndroidDevice>
+        </DCArtboard>
       </DCSection>
 
       <DCSection id="bi-status"
-        title="Status das clínicas · uma só tela"
-        subtitle="Substitui as cinco telas separadas (Sem interação · Em negociação · Ativa · Em risco · Rejeição) por uma só. Cobertura de território no topo, busca + filtros + ordenação para a lista combinada de clínicas, com o status de cada uma sinalizado por cor e tag.">
-        <DCArtboard id="bi-status" label="Status das clínicas · tela completa" width={390} height={1500}>
+        title="4 · Status das clínicas"
+        subtitle="Substitui as cinco telas separadas (Sem interação · Em negociação · Ativa · Em risco · Rejeição) por uma só. Cobertura de território no topo, busca, filtros e ordenação para a lista combinada de clínicas, com o status de cada uma sinalizado por cor e tag.">
+        <DCArtboard id="bi-status" label="Tela completa · rolagem" width={390} height={1500}>
           <AndroidDevice width={390} height={1500}>
             <BIScreen initialView={{ type: 'clinic-status' }}/>
           </AndroidDevice>
         </DCArtboard>
       </DCSection>
 
+      <DCSection id="bi-conversion"
+        title="5 · Análise de conversão"
+        subtitle="Sub-tela acessada do card de Conversão na tela principal. Hero com a taxa de conversão, três mini-métricas (Convertidas · Em decisão · Sem conversão), funil de conversão (Visitas → Interesse → Conversões), busca, ordenação e lista por clínica com o status sinalizado por cor e tag.">
+        <DCArtboard id="bi-conversion-device" label="Acima da dobra" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <BIScreen initialView={{ type: 'conversion' }}/>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="bi-conversion-won" label="Filtro · convertidas" width={390} height={1300}>
+          <AndroidDevice width={390} height={1300}>
+            <BIScreen initialView={{ type: 'conversion', focus: 'convertidas' }}/>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="bi-conversion-decisao" label="Filtro · em decisão" width={390} height={1300}>
+          <AndroidDevice width={390} height={1300}>
+            <BIScreen initialView={{ type: 'conversion', focus: 'decisao' }}/>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="bi-conversion-sem" label="Filtro · sem conversão" width={390} height={1300}>
+          <AndroidDevice width={390} height={1300}>
+            <BIScreen initialView={{ type: 'conversion', focus: 'sem' }}/>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="bi-conversion-full" label="Tela completa · rolagem" width={390} height={1700}>
+          <AndroidDevice width={390} height={1700}>
+            <BIScreen initialView={{ type: 'conversion' }}/>
+          </AndroidDevice>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="phase3-activity-full"
+        title="6 · Histórico de atividades"
+        subtitle="Tela cheia aberta a partir do card 'Atividades recentes' na visão geral. Mostra todas as atividades do representante (visitas, ligações, pedidos, apresentações, follow-ups, e-mails) com busca, filtros por tipo, intervalo de datas e exportação para CSV.">
+        <DCArtboard id="phase3-activity-default" label="Padrão · 7 dias · todas" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <ActivityFullListScreen/>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="phase3-activity-visits" label="Filtro · visitas" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <ActivityFullListScreen initialFilter="visit" initialDateRange="30days"/>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="phase3-activity-search" label={'Busca · "atlasvit"'} width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <ActivityFullListScreen initialQuery="atlasvit" initialDateRange="all"/>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="phase3-activity-scroll" label="Tela completa · rolagem" width={390} height={1500}>
+          <AndroidDevice width={390} height={1500}>
+            <ActivityFullListScreen initialDateRange="all"/>
+          </AndroidDevice>
+        </DCArtboard>
+      </DCSection>
+
       <DCSection id="bi-destinos"
-        title="Demais destinos"
-        subtitle="Atividade (CTA da Meta combinada) e Qualidade dos dados — lista de cadastros incompletos com a sub-tela de correção que abre ao tocar em uma clínica ou médico da lista.">
+        title="7 · Qualidade dos dados"
+        subtitle="Acessada do card 'Qualidade dos dados' na visão geral. Lista os cadastros incompletos (clínicas e médicos), ordenada pelo número de campos pendentes. Tocar em qualquer linha abre a sub-tela de correção, com os campos faltantes em destaque e os já preenchidos como confirmação.">
         {BI_SECTION_FRAMES.map(f => (
           <DCArtboard key={f.id} id={f.id} label={f.label} width={390} height={f.height || 844}>
             <AndroidDevice width={390} height={f.height || 844}>
@@ -339,6 +425,7 @@ function BIApp() {
           </DCArtboard>
         ))}
       </DCSection>
+
     </DesignCanvas>
   );
 }
@@ -352,13 +439,13 @@ function LoginApp() {
     <ThemeCtx.Provider value={theme}>
       <DesignCanvas>
 
-        <DCSection id="splash-flow" title="1 · Abertura" subtitle="O usuário inicia o app e cai no login.">
+        <DCSection id="splash-flow" title="1 · Abertura" subtitle="O representante abre o app e a tela de splash dá lugar ao login.">
           <DCArtboard id="splash-and" label="Splash" width={390} height={844}>
             <AtlasFlowSingle platform="android" initialScreen="splash"/>
           </DCArtboard>
         </DCSection>
 
-        <DCSection id="login" title="2 · Login" subtitle="E-mail + senha, com opção de recuperação.">
+        <DCSection id="login" title="2 · Login" subtitle="Acesso com e-mail e senha, link para recuperação e foco em campo no estado preenchido.">
           <DCArtboard id="login-and" label="Login · vazio" width={390} height={844}>
             <AtlasFlowSingle platform="android" initialScreen="login"/>
           </DCArtboard>
@@ -367,7 +454,7 @@ function LoginApp() {
           </DCArtboard>
         </DCSection>
 
-        <DCSection id="errors" title="3 · Erros" subtitle="Senha incorreta, bloqueio, sem conexão.">
+        <DCSection id="errors" title="3 · Estados de erro" subtitle="Os três cenários que o representante pode encontrar ao tentar entrar: credencial incorreta, conta bloqueada por tentativas e dispositivo sem conexão.">
           <DCArtboard id="err-wrong" label="Senha incorreta" width={390} height={844}>
             <AtlasFlowSingle platform="android" initialScreen="login" scenario="wrong"/>
           </DCArtboard>
@@ -379,7 +466,7 @@ function LoginApp() {
           </DCArtboard>
         </DCSection>
 
-        <DCSection id="forgot" title="4 · Esqueci minha senha" subtitle="E-mail → código → nova senha → sucesso.">
+        <DCSection id="forgot" title="4 · Esqueci minha senha" subtitle="Fluxo em três passos com confirmação ao final: informar e-mail, validar o código recebido e definir uma nova senha.">
           <DCArtboard id="forgot-email" label="Passo 1 · E-mail" width={390} height={844}>
             <AtlasFlowSingle platform="android" initialScreen="forgot-email"/>
           </DCArtboard>
@@ -392,13 +479,13 @@ function LoginApp() {
           <DCArtboard id="forgot-new" label="Passo 3 · Nova senha" width={390} height={844}>
             <PreFilledForgot step="forgot-new" platform="android"/>
           </DCArtboard>
-          <DCArtboard id="forgot-success" label="Sucesso" width={390} height={844}>
+          <DCArtboard id="forgot-success" label="Confirmação" width={390} height={844}>
             <AtlasFlowSingle platform="android" initialScreen="forgot-success"/>
           </DCArtboard>
         </DCSection>
 
-        <DCSection id="success" title="5 · Acesso concedido" subtitle="Confirmação antes da área de trabalho.">
-          <DCArtboard id="login-ok-and" label="Sucesso" width={390} height={844}>
+        <DCSection id="success" title="5 · Acesso concedido" subtitle="Tela de confirmação que aparece logo após o login bem-sucedido, antes do representante entrar na área de trabalho.">
+          <DCArtboard id="login-ok-and" label="Acesso confirmado" width={390} height={844}>
             <AtlasFlowSingle platform="android" initialScreen="login-success"/>
           </DCArtboard>
         </DCSection>
@@ -415,7 +502,7 @@ function ExplorarApp() {
   return (
     <DesignCanvas>
 
-      <DCSection id="list" title="1 · Lista — Clínicas & Médicos" subtitle="Busca unificada com scroll infinito, filtros e ordenação.">
+      <DCSection id="list" title="1 · Lista de clínicas e médicos" subtitle="Ponto de partida da exploração. Lista unificada com busca, filtros (status comercial e produtos em uso), ordenação e estados de busca, filtro aplicado e vazio.">
         <DCArtboard id="list-clinics" label="Clínicas · padrão" width={390} height={844}>
           <AndroidDevice width={390} height={844}>
             <ListScreen initialKind="clinic"/>
@@ -426,7 +513,7 @@ function ExplorarApp() {
             <ListScreen initialKind="doctor"/>
           </AndroidDevice>
         </DCArtboard>
-        <DCArtboard id="list-search" label="Buscando" width={390} height={844}>
+        <DCArtboard id="list-search" label="Busca em andamento" width={390} height={844}>
           <AndroidDevice width={390} height={844}>
             <ListScreen initialKind="clinic" initialQuery="santa"/>
           </AndroidDevice>
@@ -436,12 +523,12 @@ function ExplorarApp() {
             <ListScreen initialKind="clinic" initialFilters={{ status: ['ativa','negociacao'], products: ['AtlasGel'] }}/>
           </AndroidDevice>
         </DCArtboard>
-        <DCArtboard id="list-filter-sheet" label="Painel de filtros" width={390} height={844}>
+        <DCArtboard id="list-filter-sheet" label="Painel de filtros aberto" width={390} height={844}>
           <AndroidDevice width={390} height={844}>
             <ListScreen initialKind="clinic" initialFilterOpen/>
           </AndroidDevice>
         </DCArtboard>
-        <DCArtboard id="list-sort-sheet" label="Painel de ordenação" width={390} height={844}>
+        <DCArtboard id="list-sort-sheet" label="Painel de ordenação aberto" width={390} height={844}>
           <AndroidDevice width={390} height={844}>
             <ListScreen initialKind="clinic" initialSortOpen/>
           </AndroidDevice>
@@ -453,12 +540,7 @@ function ExplorarApp() {
         </DCArtboard>
       </DCSection>
 
-      <DCSection id="clinic-detail" title="2 · Clínica · página individual" subtitle="Tudo que um consultor precisa antes de entrar na clínica: sinais, saúde comercial, produtos em uso, histórico de visitas e dossiê dos médicos.">
-        <DCArtboard id="clinic-full" label="Página completa · rolagem" width={390} height={4400}>
-          <AndroidDevice width={390} height={4400}>
-            <ClinicDetailScreen/>
-          </AndroidDevice>
-        </DCArtboard>
+      <DCSection id="clinic-detail" title="2 · Página da clínica" subtitle="Tudo o que o representante precisa antes de entrar na clínica: sinais, saúde comercial, produtos em uso, fontes pagadoras, clínicas próximas, histórico de visitas e dossiê dos médicos atendendo no local.">
         <DCArtboard id="clinic-top" label="Acima da dobra" width={390} height={844}>
           <AndroidDevice width={390} height={844}>
             <ClinicDetailScreen/>
@@ -472,22 +554,417 @@ function ExplorarApp() {
             </div>
           </AndroidDevice>
         </DCArtboard>
-      </DCSection>
-
-      <DCSection id="doctor-detail" title="3 · Médico · página individual" subtitle="Perfil detalhado de um médico — pessoal, prescrição, clínicas onde atende, histórico de visitas.">
-        <DCArtboard id="doctor-full" label="Página completa · rolagem" width={390} height={2400}>
-          <AndroidDevice width={390} height={2400}>
-            <DoctorDetailScreen/>
+        <DCArtboard id="clinic-full" label="Página completa · rolagem" width={390} height={4400}>
+          <AndroidDevice width={390} height={4400}>
+            <ClinicDetailScreen/>
           </AndroidDevice>
         </DCArtboard>
+      </DCSection>
+
+      <DCSection id="doctor-detail" title="3 · Página do médico" subtitle="Perfil detalhado do médico individual: dados pessoais, perfil de prescrição, clínicas onde atende e histórico de visitas com cada clínica.">
         <DCArtboard id="doctor-top" label="Acima da dobra" width={390} height={844}>
           <AndroidDevice width={390} height={844}>
             <DoctorDetailScreen/>
           </AndroidDevice>
         </DCArtboard>
+        <DCArtboard id="doctor-full" label="Página completa · rolagem" width={390} height={2400}>
+          <AndroidDevice width={390} height={2400}>
+            <DoctorDetailScreen/>
+          </AndroidDevice>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="phase1-overlays"
+        title="4 · Galeria de fotos e sugestão de alteração"
+        subtitle="Dois overlays disparados a partir das páginas de clínica ou médico: a galeria de fotos em tela cheia e o modal de sugestão de alteração de cadastro (que envia a mudança proposta para aprovação do gestor antes de aplicar).">
+        <DCArtboard id="phase1-gallery" label="Galeria de fotos · clínica" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
+              <ClinicDetailScreen/>
+              <PhotoGalleryViewer
+                open={true}
+                onClose={() => {}}
+                photos={CLINIC_DETAIL.gallery}
+                title="Fotos da clínica"
+              />
+            </div>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="phase1-edit-clinic" label="Sugerir alteração · telefone da clínica" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
+              <ClinicDetailScreen/>
+              <EditSuggestionModal
+                open={true}
+                onClose={() => {}}
+                fieldKey="clinicPhone"
+                currentValue="(11) 3078-4522"
+                entityType="clinic"
+                entityId="c-0"
+                entityName="Clínica Santa Mônica"
+              />
+            </div>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="phase1-edit-doctor" label="Sugerir alteração · WhatsApp do médico" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
+              <DoctorDetailScreen/>
+              <EditSuggestionModal
+                open={true}
+                onClose={() => {}}
+                fieldKey="doctorWhatsapp"
+                currentValue="—"
+                entityType="doctor"
+                entityId="d-0"
+                entityName="Dra. Mariana Silva"
+              />
+            </div>
+          </AndroidDevice>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="phase2-visit-history"
+        title="5 · Histórico de visitas"
+        subtitle="Tela cheia aberta a partir do card 'Visitas recentes' nas páginas de clínica e médico. Mostra todas as visitas com busca por anotação ou consultor, filtros por desfecho (positivas, mistas, negativas), resumo (total · pedidos · duração média) e exportação para PDF ou CSV.">
+        <DCArtboard id="phase2-visits-clinic" label="Histórico · clínica · todas" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
+              <VisitHistoryFullScreen
+                entityType="clinic"
+                entityName="Clínica Santa Mônica"
+              />
+            </div>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="phase2-visits-doctor" label="Histórico · médico · com local" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
+              <VisitHistoryFullScreen
+                entityType="doctor"
+                entityName="Dra. Mariana Silva"
+              />
+            </div>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="phase2-visits-positives" label="Filtro · positivas" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
+              <Phase2VisitsWithFilter filter="positivas"/>
+            </div>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="phase2-visits-search" label={'Busca · "atlasvit"'} width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
+              <Phase2VisitsWithSearch query="atlasvit"/>
+            </div>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="phase2-visits-empty" label="Sem resultados" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
+              <Phase2VisitsWithSearch query="zzzzz"/>
+            </div>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="phase2-visits-scroll" label="Lista completa · rolagem" width={390} height={1700}>
+          <AndroidDevice width={390} height={1700}>
+            <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
+              <VisitHistoryFullScreen
+                entityType="clinic"
+                entityName="Clínica Santa Mônica"
+              />
+            </div>
+          </AndroidDevice>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="phase2-products-full"
+        title="6 · Catálogo de produtos em uso"
+        subtitle="Catálogo completo dos produtos comprados pela clínica, com tendência de 6 meses, share, crescimento, detalhamento mensal expansível por linha e oportunidades não compradas. Acessada do card 'Produtos em uso' na página da clínica.">
+        <DCArtboard id="phase2-products-share" label="Ordenado por share" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
+              <ClinicDetailScreen/>
+              <ProductsFullListScreen clinicName="Clínica Santa Mônica" initialSort="share"/>
+            </div>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="phase2-products-growth" label="Ordenado por crescimento" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
+              <ClinicDetailScreen/>
+              <ProductsFullListScreen clinicName="Clínica Santa Mônica" initialSort="growth"/>
+            </div>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="phase2-products-sort-sheet" label="Painel de ordenação aberto" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
+              <ProductsFullListScreen
+                clinicName="Clínica Santa Mônica"
+                initialSortSheetOpen
+              />
+            </div>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="phase2-products-expanded" label="Linha expandida · detalhamento mensal" width={390} height={1100}>
+          <AndroidDevice width={390} height={1100}>
+            <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
+              <ProductsFullListScreen
+                clinicName="Clínica Santa Mônica"
+                initialSort="share"
+                initialExpandedId="prod-1"
+              />
+            </div>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="phase2-products-scroll" label="Catálogo completo · rolagem" width={390} height={1500}>
+          <AndroidDevice width={390} height={1500}>
+            <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
+              <ProductsFullListScreen
+                clinicName="Clínica Santa Mônica"
+                initialSort="share"
+              />
+            </div>
+          </AndroidDevice>
+        </DCArtboard>
       </DCSection>
 
     </DesignCanvas>
+  );
+}
+
+// Phase 2 showcase helpers — let each artboard demonstrate a
+// specific state of VisitHistoryFullScreen (filter applied,
+// active search, empty results) by rendering an inline variant
+// that accepts initial filter / search props.
+function Phase2VisitsWithFilter({ filter }) {
+  return <VHFInline entityType="clinic" entityName="Clínica Santa Mônica" defaultFilter={filter} defaultSearch=""/>;
+}
+function Phase2VisitsWithSearch({ query }) {
+  return <VHFInline entityType="clinic" entityName="Clínica Santa Mônica" defaultFilter="todas" defaultSearch={query}/>;
+}
+function VHFInline({ entityType, entityName, defaultFilter, defaultSearch }) {
+  const visits = window.ALL_VISITS_MOCK;
+  const [filter, setFilter] = React.useState(defaultFilter);
+  const [searchQuery, setSearchQuery] = React.useState(defaultSearch);
+  const counts = {
+    todas:     visits.length,
+    positivas: visits.filter(v => v.outcome === 'positivo').length,
+    mistas:    visits.filter(v => v.outcome === 'misto').length,
+    negativas: visits.filter(v => v.outcome === 'negativo').length,
+  };
+  const outcomeFiltered = visits.filter(v => {
+    if (filter === 'todas') return true;
+    if (filter === 'positivas') return v.outcome === 'positivo';
+    if (filter === 'mistas')    return v.outcome === 'misto';
+    if (filter === 'negativas') return v.outcome === 'negativo';
+    return true;
+  });
+  const filtered = outcomeFiltered.filter(v => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      (v.note || '').toLowerCase().includes(q) ||
+      (v.consultant || '').toLowerCase().includes(q) ||
+      (v.withWhom || '').toLowerCase().includes(q) ||
+      (v.kind || '').toLowerCase().includes(q)
+    );
+  });
+  const totalVisits = filtered.length;
+  const ordersWithValue = filtered.filter(v => v.orderValue);
+  const totalOrders = ordersWithValue.length;
+  const totalValue = ordersWithValue.reduce((sum, v) => {
+    const raw = v.orderValue.replace(/[^\d,]/g, '').replace('.', '').replace(',', '.');
+    const n = parseFloat(raw);
+    return sum + (isNaN(n) ? 0 : n);
+  }, 0);
+  const avgDuration = totalVisits === 0 ? 0 : Math.round(
+    filtered.reduce((sum, v) => {
+      const hMatch = (v.duration || '').match(/(\d+)\s*h/);
+      const mMatch = (v.duration || '').match(/(\d+)\s*min/);
+      const h = hMatch ? parseInt(hMatch[1], 10) : 0;
+      const m = mMatch ? parseInt(mMatch[1], 10) : 0;
+      return sum + h * 60 + m;
+    }, 0) / totalVisits
+  );
+
+  return (
+    <div style={{
+      position: 'absolute', inset: 0, background: '#f7f8fb',
+      fontFamily: 'Inter, system-ui',
+      display: 'flex', flexDirection: 'column', overflow: 'hidden',
+    }}>
+      <div style={{
+        padding: '12px 14px', background: '#fff',
+        borderBottom: '1px solid #eef0f3', flexShrink: 0,
+        display: 'flex', alignItems: 'center', gap: 10,
+      }}>
+        <button aria-label="Voltar" style={{
+          width: 36, height: 36, borderRadius: 11,
+          border: '1px solid #eef0f3', background: '#fff',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          color: '#0a2f7f', cursor: 'pointer',
+        }}>
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round">
+            <path d="M10 3l-5 5 5 5"/>
+          </svg>
+        </button>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 9.5, color: '#8a94a6', fontWeight: 700, letterSpacing: 0.8, textTransform: 'uppercase' }}>
+            Histórico de visitas
+          </div>
+          <div style={{ fontSize: 15, fontWeight: 700, color: '#0f1729', marginTop: 1, letterSpacing: -0.2 }}>
+            {entityName}
+          </div>
+        </div>
+        <button aria-label="Exportar" style={{
+          width: 36, height: 36, borderRadius: 11,
+          border: '1px solid #eef0f3', background: '#fff',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          color: '#0a2f7f', cursor: 'pointer',
+        }}>
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M8 2.5v7.5"/><path d="M5 7l3 3 3-3"/><path d="M3 13.2h10"/>
+          </svg>
+        </button>
+      </div>
+
+      <div style={{
+        padding: '14px 16px 12px', background: '#fff',
+        borderBottom: '1px solid #eef0f3',
+        display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, flexShrink: 0,
+      }}>
+        <div>
+          <div style={{ fontSize: 18, fontWeight: 700, color: '#0a2f7f', letterSpacing: -0.4, fontVariantNumeric: 'tabular-nums', lineHeight: 1.1 }}>{totalVisits}</div>
+          <div style={{ fontSize: 10.5, color: '#8a94a6', marginTop: 3, fontWeight: 500 }}>visitas</div>
+        </div>
+        <div>
+          <div style={{ fontSize: 18, fontWeight: 700, color: '#16a373', letterSpacing: -0.4, fontVariantNumeric: 'tabular-nums', lineHeight: 1.1 }}>
+            {totalOrders > 0 ? `R$ ${(totalValue / 1000).toFixed(1)}k` : '—'}
+          </div>
+          <div style={{ fontSize: 10.5, color: '#8a94a6', marginTop: 3, fontWeight: 500 }}>
+            {totalOrders} {totalOrders === 1 ? 'pedido' : 'pedidos'}
+          </div>
+        </div>
+        <div>
+          <div style={{ fontSize: 18, fontWeight: 700, color: '#0f1729', letterSpacing: -0.4, fontVariantNumeric: 'tabular-nums', lineHeight: 1.1 }}>
+            {avgDuration > 0 ? `${avgDuration} min` : '—'}
+          </div>
+          <div style={{ fontSize: 10.5, color: '#8a94a6', marginTop: 3, fontWeight: 500 }}>duração média</div>
+        </div>
+      </div>
+
+      <div style={{
+        padding: '12px 16px 8px', background: '#fff',
+        borderBottom: '1px solid #f3f4f6', flexShrink: 0,
+      }}>
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 9,
+          background: '#f7f8fb', border: '1px solid #eef0f3',
+          borderRadius: 12, padding: '9px 12px',
+        }}>
+          <svg width="14" height="14" viewBox="0 0 15 15" fill="none" stroke="#8a94a6" strokeWidth="1.7">
+            <circle cx="6.5" cy="6.5" r="5"/><path d="M11 11l2.5 2.5"/>
+          </svg>
+          <input
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Buscar na anotação, consultor…"
+            style={{
+              flex: 1, border: 'none', outline: 'none', background: 'transparent',
+              fontSize: 13.5, fontFamily: 'Inter, system-ui', color: '#0f1729', minWidth: 0,
+            }}
+          />
+          {searchQuery && (
+            <button onClick={() => setSearchQuery('')} aria-label="Limpar busca" style={{
+              width: 18, height: 18, borderRadius: 9, background: '#e5e7eb',
+              border: 'none', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              padding: 0, flexShrink: 0,
+            }}>
+              <svg width="8" height="8" viewBox="0 0 8 8" fill="none" stroke="#6b7280" strokeWidth="1.7" strokeLinecap="round">
+                <path d="M1.5 1.5l5 5M6.5 1.5l-5 5"/>
+              </svg>
+            </button>
+          )}
+        </div>
+      </div>
+
+      <div style={{
+        padding: '10px 16px 12px', background: '#fff',
+        borderBottom: '1px solid #eef0f3',
+        display: 'flex', gap: 6, overflowX: 'auto', flexShrink: 0,
+      }}>
+        {[
+          { key: 'todas', label: 'Todas' },
+          { key: 'positivas', label: 'Positivas' },
+          { key: 'mistas', label: 'Mistas' },
+          { key: 'negativas', label: 'Negativas' },
+        ].map(f => {
+          const active = filter === f.key;
+          return (
+            <button key={f.key} onClick={() => setFilter(f.key)} style={{
+              padding: '6px 11px', borderRadius: 999,
+              border: `1px solid ${active ? '#0a2f7f' : '#eef0f3'}`,
+              background: active ? '#0a2f7f' : '#fff',
+              color: active ? '#fff' : '#374151',
+              fontSize: 12, fontWeight: 600, cursor: 'pointer',
+              fontFamily: 'Inter, system-ui',
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+              flexShrink: 0, whiteSpace: 'nowrap',
+            }}>
+              {f.label}
+              <span style={{
+                fontSize: 10, fontWeight: 700, padding: '1px 6px',
+                borderRadius: 6,
+                background: active ? 'rgba(255,255,255,0.22)' : '#f3f4f6',
+                color: active ? '#fff' : '#6b7280', lineHeight: 1.2,
+              }}>{counts[f.key]}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      <div style={{ flex: 1, overflowY: 'auto', padding: '14px 16px 28px' }}>
+        {filtered.length === 0 ? (
+          <div style={{ textAlign: 'center', paddingTop: 60, color: '#9ca3af' }}>
+            <div style={{
+              width: 64, height: 64, borderRadius: 32, background: '#f3f4f6',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              margin: '0 auto 14px',
+            }}>
+              <svg width="26" height="26" viewBox="0 0 28 28" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <rect x="4" y="6" width="20" height="16" rx="2"/>
+                <path d="M4 11h20M10 3v6M18 3v6"/>
+              </svg>
+            </div>
+            <div style={{ fontSize: 15, fontWeight: 700, color: '#0f1729', marginBottom: 4 }}>
+              Nenhuma visita encontrada
+            </div>
+            <div style={{ fontSize: 12.5, color: '#6b7280' }}>
+              Ajuste os filtros ou a busca
+            </div>
+          </div>
+        ) : (
+          <div style={{
+            background: '#fff', border: '1px solid #eef0f3',
+            borderRadius: 14, padding: 16,
+          }}>
+            {filtered.map((visit, i) => (
+              <VisitHistoryRow
+                key={visit.id}
+                visit={visit}
+                isLast={i === filtered.length - 1}
+                showLocation={entityType === 'doctor'}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -500,7 +977,7 @@ function MapApp() {
     <ThemeCtx.Provider value={theme}>
       <DesignCanvas>
 
-        <DCSection id="map-initial" title="1 · Mapa — visão inicial" subtitle="Busca + pins coloridos por recorrência de visita + sugestão de alto potencial.">
+        <DCSection id="map-initial" title="1 · Mapa · visão inicial" subtitle="Ponto de partida do dia em campo: busca por endereço ou nome, pins coloridos por recorrência de visita e sugestão proativa de clínica de alto potencial próxima.">
           <DCArtboard id="map-1" label="Visão inicial" width={390} height={844}>
             <AndroidDevice width={390} height={844}>
               <MapScreen1_Initial/>
@@ -508,10 +985,15 @@ function MapApp() {
           </DCArtboard>
         </DCSection>
 
-        <DCSection id="map-clinic" title="2 · Clínica selecionada" subtitle="Bottom-sheet com contexto comercial, ações rápidas e clínicas próximas.">
+        <DCSection id="map-clinic" title="2 · Clínica selecionada" subtitle="Ao tocar em um pin, abre um bottom-sheet com contexto comercial da clínica, ações rápidas (ligar, WhatsApp, rota, nova visita, novo pedido) e slider de clínicas próximas.">
           <DCArtboard id="map-2" label="Clínica selecionada" width={390} height={844}>
             <AndroidDevice width={390} height={844}>
               <MapScreen2_ClinicSelected/>
+            </AndroidDevice>
+          </DCArtboard>
+          <DCArtboard id="map-3" label="Clínicas próximas · slider" width={390} height={844}>
+            <AndroidDevice width={390} height={844}>
+              <MapScreen3_NearbySheet/>
             </AndroidDevice>
           </DCArtboard>
           <DCArtboard id="map-2-full" label="Drawer completo · todas as seções" width={420} height={1400}>
@@ -523,15 +1005,10 @@ function MapApp() {
               <ClinicBottomSheet mode="full"/>
             </div>
           </DCArtboard>
-          <DCArtboard id="map-3" label="Clínicas próximas (slider)" width={390} height={844}>
-            <AndroidDevice width={390} height={844}>
-              <MapScreen3_NearbySheet/>
-            </AndroidDevice>
-          </DCArtboard>
         </DCSection>
 
-        <DCSection id="map-route" title="3 · Rota sugerida" subtitle="Resumo rápido + planejamento completo com reordenação.">
-          <DCArtboard id="map-4" label="Rota sugerida (resumo)" width={390} height={844}>
+        <DCSection id="map-route" title="3 · Rota sugerida" subtitle="A partir das clínicas selecionadas, o app sugere uma rota otimizada: resumo rápido para confirmar e tela de planejamento completo onde o representante pode reordenar paradas.">
+          <DCArtboard id="map-4" label="Rota sugerida · resumo" width={390} height={844}>
             <AndroidDevice width={390} height={844}>
               <MapScreen4_RouteSummary/>
             </AndroidDevice>
@@ -543,7 +1020,7 @@ function MapApp() {
           </DCArtboard>
         </DCSection>
 
-        <DCSection id="map-active" title="4 · Rota em execução" subtitle="Foco na próxima parada; sugestões contextuais no caminho.">
+        <DCSection id="map-active" title="4 · Rota em execução" subtitle="Durante o deslocamento, o foco é a próxima parada. O app pode oferecer sugestões dinâmicas — por exemplo, uma clínica de alto potencial pelo caminho — sem tirar o representante do fluxo.">
           <DCArtboard id="map-6" label="Rota em execução" width={390} height={844}>
             <AndroidDevice width={390} height={844}>
               <MapScreen6_RouteActive/>
@@ -556,8 +1033,8 @@ function MapApp() {
           </DCArtboard>
         </DCSection>
 
-        <DCSection id="map-visit-flow" title="4b · Fluxo de visita em rota" subtitle="Chegada à clínica → visita em andamento → concluir ao se afastar.">
-          <DCArtboard id="map-6b" label="Próximo da clínica · Iniciar visita" width={390} height={844}>
+        <DCSection id="map-visit-flow" title="4b · Fluxo de visita em rota" subtitle="Detecção automática de chegada e saída da localização da clínica: o app oferece iniciar a visita ao chegar, mostra o estado 'em andamento' e, ao se afastar, propõe concluir e registrar.">
+          <DCArtboard id="map-6b" label="Próximo da clínica · iniciar visita" width={390} height={844}>
             <AndroidDevice width={390} height={844}>
               <MapScreen6b_NearClinicPrompt/>
             </AndroidDevice>
@@ -567,14 +1044,14 @@ function MapApp() {
               <MapScreen6c_VisitInProgress/>
             </AndroidDevice>
           </DCArtboard>
-          <DCArtboard id="map-6d" label="Saiu da localização · Concluir visita" width={390} height={844}>
+          <DCArtboard id="map-6d" label="Saiu da localização · concluir visita" width={390} height={844}>
             <AndroidDevice width={390} height={844}>
               <MapScreen6d_LeftLocationPrompt/>
             </AndroidDevice>
           </DCArtboard>
         </DCSection>
 
-        <DCSection id="map-log" title="5 · Registrar visita" subtitle="Resultado + anotação opcional + follow-up em poucos toques.">
+        <DCSection id="map-log" title="5 · Registrar visita" subtitle="Tela curta para o pós-visita: resultado da conversa (positivo, misto, negativo), anotação opcional e agendamento de follow-up — tudo em poucos toques para não roubar tempo do dia em campo.">
           <DCArtboard id="map-8" label="Registrar visita" width={390} height={844}>
             <AndroidDevice width={390} height={844}>
               <MapScreen8_LogVisit/>
@@ -582,7 +1059,7 @@ function MapApp() {
           </DCArtboard>
         </DCSection>
 
-        <DCSection id="map-followups" title="6 · Follow-ups" subtitle="Pendências, hoje, próximos e concluídos.">
+        <DCSection id="map-followups" title="6 · Follow-ups" subtitle="Lista dos compromissos agendados, organizados em pendentes, hoje, próximos e concluídos. Ponto de checagem do representante para nada cair no esquecimento.">
           <DCArtboard id="map-9" label="Follow-ups" width={390} height={844}>
             <AndroidDevice width={390} height={844}>
               <MapScreen9_Followups/>
@@ -590,15 +1067,15 @@ function MapApp() {
           </DCArtboard>
         </DCSection>
 
-        <DCSection id="map-quick" title="7 · Menu flutuante" subtitle="Acesso rápido a todas as áreas sem poluir o mapa.">
-          <DCArtboard id="map-10" label="Menu flutuante" width={390} height={844}>
+        <DCSection id="map-quick" title="7 · Menu flutuante" subtitle="Botão de ação rápida sobreposto ao mapa, com atalhos para Favoritos, Histórico, Follow-ups e Configurações. Mantém o mapa limpo enquanto preserva navegação rápida.">
+          <DCArtboard id="map-10" label="Menu flutuante aberto" width={390} height={844}>
             <AndroidDevice width={390} height={844}>
               <MapScreen10_QuickMenu/>
             </AndroidDevice>
           </DCArtboard>
         </DCSection>
 
-        <DCSection id="map-favorites" title="8 · Favoritos" subtitle="Clínicas marcadas como favoritas — atalho vindo do menu flutuante.">
+        <DCSection id="map-favorites" title="8 · Favoritos" subtitle="Atalho a partir do menu flutuante. Lista das clínicas marcadas como favoritas pelo representante para acesso rápido sem precisar buscar.">
           <DCArtboard id="map-favorites-list" label="Lista de favoritos" width={390} height={844}>
             <AndroidDevice width={390} height={844}>
               <MapScreen_Favoritos/>
@@ -619,8 +1096,8 @@ function PedidosApp() {
     <DesignCanvas>
 
       <DCSection id="orders-main"
-        title="1 · Meus Pedidos"
-        subtitle="Visão geral dos pedidos ativos e histórico. O botão Novo pedido fica fixo e centralizado no rodapé para máxima visibilidade.">
+        title="1 · Meus pedidos"
+        subtitle="Visão geral dos pedidos ativos e do histórico recente. O CTA 'Novo pedido' fica fixo e centralizado no rodapé para garantir máxima visibilidade — inclusive no estado vazio, onde funciona como ponto de entrada óbvio para o representante.">
         <DCArtboard id="orders-list" label="Com pedidos · CTA fixo no rodapé" width={390} height={844}>
           <AndroidDevice width={390} height={844}>
             <MeusOrdersScreen/>
@@ -634,8 +1111,8 @@ function PedidosApp() {
       </DCSection>
 
       <DCSection id="order-detail"
-        title="1b · Detalhes do Pedido"
-        subtitle="Ao tocar em um pedido da lista, o usuário vê todos os dados: acompanhamento, rastreio, destino, itens e pagamento.">
+        title="1b · Detalhes do pedido"
+        subtitle="Ao tocar em qualquer pedido da lista, abre a página individual com todos os dados: linha do tempo de acompanhamento, rastreio quando em trânsito, destino, itens e forma de pagamento.">
         <DCArtboard id="detail-transit" label="Em trânsito · com rastreio" width={390} height={844}>
           <AndroidDevice width={390} height={844}>
             <OrderDetailScreen orderId="PED-2041"/>
@@ -649,8 +1126,8 @@ function PedidosApp() {
       </DCSection>
 
       <DCSection id="products"
-        title="2 · Novo Pedido — Produtos"
-        subtitle="Catálogo com busca, filtros por categoria e controle de quantidade.">
+        title="2 · Novo pedido · produtos"
+        subtitle="Primeira etapa do fluxo de novo pedido. Catálogo de produtos com busca, filtros por categoria e cards clicáveis. Tocar em um produto abre o modal de quantidade e preço (próxima seção).">
         <DCArtboard id="products-default" label="Vista padrão · sem itens" width={390} height={844}>
           <AndroidDevice width={390} height={844}>
             <NewOrderProductsScreen/>
@@ -666,11 +1143,57 @@ function PedidosApp() {
             <NewOrderProductsScreen cart={SAMPLE_CART}/>
           </AndroidDevice>
         </DCArtboard>
+        <DCArtboard id="phase3-products-with-clinic" label="Com clínica selecionada · histórico" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <NewOrderProductsScreen
+              clinic={{ id: 'c-0', name: 'Clínica Santa Mônica' }}
+            />
+          </AndroidDevice>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="phase3-product-modal"
+        title="2b · Modal do produto · quantidade e preço"
+        subtitle="Ao tocar em um produto, abre um bottom-sheet onde o representante define a quantidade e o preço unitário. Quando a clínica destinatária já comprou o produto antes, o preço sugerido vem do último agreement comercial; caso contrário, parte do preço de tabela. O representante pode aceitar a sugestão, usar a tabela ou personalizar o preço (sujeito a aprovação).">
+        <DCArtboard id="phase3-modal-no-clinic" label="Sem clínica · só tabela disponível" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <NewOrderProductsScreen initialSheetProductId="p1"/>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="phase3-modal-custom" label="Com preço personalizado" width={390} height={1100}>
+          <AndroidDevice width={390} height={1100}>
+            <NewOrderProductsScreen
+              clinic={{ id: 'c-0', name: 'Clínica Santa Mônica' }}
+              initialSheetProductId="p4"
+              initialSheetQty={12}
+              initialSheetMode="custom"
+              initialSheetUnit={119.00}
+            />
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="phase3-modal-suggestion" label="Com sugestão de preço · histórico" width={390} height={1300}>
+          <AndroidDevice width={390} height={1300}>
+            <NewOrderProductsScreen
+              clinic={{ id: 'c-0', name: 'Clínica Santa Mônica' }}
+              initialSheetProductId="p1"
+              initialSheetQty={24}
+            />
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="phase3-modal-recurring" label="Cliente recorrente · maior desconto" width={390} height={1300}>
+          <AndroidDevice width={390} height={1300}>
+            <NewOrderProductsScreen
+              clinic={{ id: 'c-0', name: 'Clínica Santa Mônica' }}
+              initialSheetProductId="p6"
+              initialSheetQty={30}
+            />
+          </AndroidDevice>
+        </DCArtboard>
       </DCSection>
 
       <DCSection id="cart-review"
         title="3 · Carrinho"
-        subtitle="Revisão dos itens selecionados e subtotal antes do checkout.">
+        subtitle="Revisão dos itens selecionados, com quantidades e subtotal por linha. O representante confirma o pedido antes de avançar para o checkout.">
         <DCArtboard id="cart-screen" label="Revisão do carrinho" width={390} height={844}>
           <AndroidDevice width={390} height={844}>
             <CartScreen/>
@@ -680,10 +1203,20 @@ function PedidosApp() {
 
       <DCSection id="checkout"
         title="4 · Checkout"
-        subtitle="Seleção de clínica e médico, resumo e confirmação do pedido.">
+        subtitle="Seleção da clínica destinatária e do médico responsável, com sheets dedicados para cada um. Resumo do pedido com economia versus tabela quando há preços negociados aplicados.">
         <DCArtboard id="checkout-empty" label="Sem destino selecionado" width={390} height={844}>
           <AndroidDevice width={390} height={844}>
             <CheckoutScreen/>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="checkout-clinic-sheet" label="Selecionar clínica · sheet aberto" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <CheckoutScreen initialClinicSheet/>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="checkout-doctor-sheet" label="Selecionar médico · sheet aberto" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <CheckoutScreen prefilled initialDoctorSheet/>
           </AndroidDevice>
         </DCArtboard>
         <DCArtboard id="checkout-filled" label="Destino selecionado · pronto para confirmar" width={390} height={844}>
@@ -695,7 +1228,7 @@ function PedidosApp() {
 
       <DCSection id="order-success"
         title="5 · Confirmação"
-        subtitle="Pedido confirmado com número, destino, itens e prazo de entrega.">
+        subtitle="Tela final do fluxo. Pedido confirmado com número de identificação, destino, itens e prazo estimado de entrega — fechando o ciclo com clareza para o representante.">
         <DCArtboard id="success-screen" label="Pedido confirmado" width={390} height={844}>
           <AndroidDevice width={390} height={844}>
             <OrderSuccessScreen/>
@@ -715,15 +1248,10 @@ function ApresentacoesApp() {
     <DesignCanvas>
 
       <DCSection id="library"
-        title="1 · Biblioteca de Apresentações"
-        subtitle="Biblioteca institucional com busca, categorias, destaques e lista completa.">
+        title="1 · Biblioteca de apresentações"
+        subtitle="Biblioteca institucional do representante. Busca por título ou categoria, filtros, destaques no topo e lista completa abaixo. Permite ao representante chegar rapidamente ao material que vai usar na visita.">
         <DCArtboard id="lib-default" label="Vista padrão · com destaques" width={390} height={844}>
           <AndroidDevice width={390} height={844}>
-            <PresentationsLibraryScreen/>
-          </AndroidDevice>
-        </DCArtboard>
-        <DCArtboard id="lib-scroll" label="Lista completa · scroll" width={390} height={1400}>
-          <AndroidDevice width={390} height={1400}>
             <PresentationsLibraryScreen/>
           </AndroidDevice>
         </DCArtboard>
@@ -732,11 +1260,16 @@ function ApresentacoesApp() {
             <PresentationsLibraryScreen selectedCategory="Produtos"/>
           </AndroidDevice>
         </DCArtboard>
+        <DCArtboard id="lib-scroll" label="Lista completa · rolagem" width={390} height={1400}>
+          <AndroidDevice width={390} height={1400}>
+            <PresentationsLibraryScreen/>
+          </AndroidDevice>
+        </DCArtboard>
       </DCSection>
 
       <DCSection id="pres-search"
-        title="2 · Busca"
-        subtitle="O representante localiza uma apresentação digitando parte do título ou categoria.">
+        title="2 · Busca na biblioteca"
+        subtitle="Estados da busca: digitando parte do título encontra os resultados imediatamente; quando não há correspondência, o estado vazio orienta o representante.">
         <DCArtboard id="search-atlas" label={'Busca ativa · "atlas"'} width={390} height={844}>
           <AndroidDevice width={390} height={844}>
             <PresentationsLibraryScreen searchQuery="atlas"/>
@@ -754,15 +1287,43 @@ function ApresentacoesApp() {
         </DCArtboard>
       </DCSection>
 
+      <DCSection id="phase3-presentation-filters"
+        title="2b · Filtros avançados"
+        subtitle="Bottom-sheet aberto pelo ícone de filtro da biblioteca. Permite refinar por categoria, laboratório e disponibilidade (multi-seleção) e por ordenação (única). Mostra contador de filtros ativos e CTA para aplicar.">
+        <DCArtboard id="phase3-filters-empty" label="Sheet · sem filtros aplicados" width={390} height={1100}>
+          <AndroidDevice width={390} height={1100}>
+            <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
+              <PresentationsLibraryScreen/>
+              <PresentationFiltersSheet/>
+            </div>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="phase3-filters-active" label="Sheet · 4 filtros ativos" width={390} height={1100}>
+          <AndroidDevice width={390} height={1100}>
+            <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
+              <PresentationsLibraryScreen/>
+              <PresentationFiltersSheet
+                currentFilters={{
+                  categories: ['cardio', 'diabetes'],
+                  laboratories: ['atlasmed'],
+                  availability: ['in-stock'],
+                  sortBy: 'newest',
+                }}
+              />
+            </div>
+          </AndroidDevice>
+        </DCArtboard>
+      </DCSection>
+
       <DCSection id="pres-detail"
-        title="3 · Detalhe da Apresentação"
-        subtitle="Preview, metadados, relacionadas e ação de download ou compartilhamento.">
+        title="3 · Detalhe da apresentação"
+        subtitle="Página individual da apresentação: preview com capa simulada, metadados (autor, categoria, atualização, idioma), apresentações relacionadas e ações principais — visualizar, baixar e compartilhar.">
         <DCArtboard id="detail-default" label="Pronta para baixar" width={390} height={844}>
           <AndroidDevice width={390} height={844}>
             <PresentationDetailScreen presentationId="pr2"/>
           </AndroidDevice>
         </DCArtboard>
-        <DCArtboard id="detail-pdf" label="Apresentação PDF · Visão Institucional" width={390} height={844}>
+        <DCArtboard id="detail-pdf" label="PDF · Visão institucional" width={390} height={844}>
           <AndroidDevice width={390} height={844}>
             <PresentationDetailScreen presentationId="pr1"/>
           </AndroidDevice>
@@ -779,6 +1340,31 @@ function ApresentacoesApp() {
         </DCArtboard>
       </DCSection>
 
+      <DCSection id="phase3-presentation-viewer"
+        title="4 · Visualizador de PDF integrado"
+        subtitle="Ao tocar 'Visualizar' na tela de detalhe, o representante abre o PDF dentro do próprio app — sem sair para outro aplicativo. Páginas em rolagem vertical, barra flutuante com paginação e zoom, e botão de tela cheia para apresentação ao médico.">
+        <DCArtboard id="phase3-viewer-default" label="Visualizador · página 1" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <PresentationViewerScreen presentationId="pr1"/>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="phase3-viewer-mid" label="Visualizador · página de gráfico" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <PresentationViewerScreen presentationId="pr1" initialPage={5}/>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="phase3-viewer-fullscreen" label="Tela cheia · modo apresentação" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <PresentationViewerScreen presentationId="pr1" initialFullscreen initialPage={3}/>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="phase3-viewer-scroll" label="Deck completo · rolagem" width={390} height={1900}>
+          <AndroidDevice width={390} height={1900}>
+            <PresentationViewerScreen presentationId="pr1"/>
+          </AndroidDevice>
+        </DCArtboard>
+      </DCSection>
+
     </DesignCanvas>
   );
 }
@@ -791,13 +1377,8 @@ function PerfilApp() {
     <DesignCanvas>
 
       <DCSection id="profile-main"
-        title="Perfil · visão do representante"
-        subtitle="Identidade, território, resumo rápido, preferências e atividade recente — um panorama pessoal, não um dashboard.">
-        <DCArtboard id="profile-full" label="Tela completa · rolagem" width={390} height={1600}>
-          <div style={{ position: 'absolute', inset: 0, background: '#f7f8fb', overflow: 'hidden' }}>
-            <ProfileScreen/>
-          </div>
-        </DCArtboard>
+        title="1 · Perfil · visão do representante"
+        subtitle="Tela inicial do Perfil. Identidade, território, resumo rápido, preferências e atividade recente. É um panorama pessoal do representante — não um dashboard de métricas (essas vivem na aba Desempenho).">
         <DCArtboard id="profile-device" label="Dispositivo · topo" width={390} height={844}>
           <AndroidDevice width={390} height={844}>
             <ProfileScreen/>
@@ -806,6 +1387,124 @@ function PerfilApp() {
         <DCArtboard id="profile-logout" label="Confirmação · sair da conta" width={390} height={844}>
           <AndroidDevice width={390} height={844}>
             <ProfileScreen logoutConfirm/>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="profile-full" label="Tela completa · rolagem" width={390} height={1600}>
+          <div style={{ position: 'absolute', inset: 0, background: '#f7f8fb', overflow: 'hidden' }}>
+            <ProfileScreen/>
+          </div>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="phase2-profile-editor"
+        title="2 · Editar perfil"
+        subtitle="Tela cheia para o representante atualizar nome, e-mail, telefone e foto. Território é somente leitura (definido pelo gestor). Inclui action sheet para alterar a foto e ação destrutiva 'excluir conta' com confirmação dedicada.">
+        <DCArtboard id="phase2-edit-profile" label="Editor · padrão" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
+              <ProfileScreen/>
+              <ProfileEditorScreen/>
+            </div>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="phase2-edit-photo-sheet" label="Action sheet · alterar foto" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
+              <ProfileEditorScreen initialPhotoSheetOpen/>
+            </div>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="phase2-edit-delete" label="Confirmação · excluir conta" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
+              <ProfileEditorScreen initialDeleteConfirmOpen/>
+            </div>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="phase2-edit-profile-scroll" label="Editor · rolagem completa" width={390} height={1100}>
+          <div style={{ position: 'absolute', inset: 0, background: '#f7f8fb', overflow: 'hidden' }}>
+            <ProfileEditorScreen/>
+          </div>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="phase2-work-hours"
+        title="3 · Horário de trabalho"
+        subtitle="Bottom-sheet para o representante definir os dias e horários em que deseja receber notificações e sugestões do app. Inclui atalhos (Comercial, Manhã, Tarde, Estendido) e configuração custom para casos atípicos.">
+        <DCArtboard id="phase2-work-hours-default" label="Padrão · Seg–Sex 08:00–18:00" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
+              <ProfileScreen/>
+              <WorkHoursEditorSheet open={true}/>
+            </div>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="phase2-work-hours-morning" label="Atalho · manhã" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
+              <ProfileScreen/>
+              <WorkHoursEditorSheet
+                open={true}
+                initialHours={{ days: [1,2,3,4,5], startHour: 8, startMinute: 0, endHour: 12, endMinute: 0 }}
+              />
+            </div>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="phase2-work-hours-extended" label="Atalho · estendido (Seg–Sáb)" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
+              <ProfileScreen/>
+              <WorkHoursEditorSheet
+                open={true}
+                initialHours={{ days: [1,2,3,4,5,6], startHour: 7, startMinute: 30, endHour: 19, endMinute: 0 }}
+              />
+            </div>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="phase2-work-hours-custom" label="Custom · dias alternados" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
+              <ProfileScreen/>
+              <WorkHoursEditorSheet
+                open={true}
+                initialHours={{ days: [1,3,5], startHour: 9, startMinute: 30, endHour: 17, endMinute: 0 }}
+              />
+            </div>
+          </AndroidDevice>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="phase3-help"
+        title="4 · Central de ajuda"
+        subtitle="Acessada do item 'Central de ajuda' no Perfil. Hub de suporte com busca, categorias por tema, perguntas frequentes em accordion, tutoriais em vídeo e bloco de contato (telefone e e-mail) para casos não cobertos pelos artigos.">
+        <DCArtboard id="phase3-help-device" label="Acima da dobra" width={390} height={844}>
+          <AndroidDevice width={390} height={844}>
+            <HelpCenterScreen/>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="phase3-help-default" label="Tela completa · rolagem" width={390} height={1500}>
+          <AndroidDevice width={390} height={1500}>
+            <HelpCenterScreen/>
+          </AndroidDevice>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="phase3-legal"
+        title="5 · Termos e privacidade"
+        subtitle="Visualizador dos documentos legais (Termos de Uso e Política de Privacidade). Header com título e data de atualização, busca dentro do documento, índice expansível, conteúdo formatado por seções e botão de download para arquivar.">
+        <DCArtboard id="phase3-terms-default" label="Termos de uso" width={390} height={1400}>
+          <AndroidDevice width={390} height={1400}>
+            <LegalDocumentScreen type="terms"/>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="phase3-terms-toc" label="Termos · índice aberto" width={390} height={1400}>
+          <AndroidDevice width={390} height={1400}>
+            <LegalDocumentScreen type="terms" initialTOCOpen/>
+          </AndroidDevice>
+        </DCArtboard>
+        <DCArtboard id="phase3-privacy" label="Política de privacidade" width={390} height={1400}>
+          <AndroidDevice width={390} height={1400}>
+            <LegalDocumentScreen type="privacy"/>
           </AndroidDevice>
         </DCArtboard>
       </DCSection>

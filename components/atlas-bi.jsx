@@ -644,6 +644,81 @@ function ResumoGroup({ kicker, hero, sub, deltaText, deltaTone = 'good', onHeroC
 //   3. Gráfico de 14 dias com a linha de meta sobreposta.
 //   4. CTA único "Ver atividade detalhada" → tela de análise.
 // ─────────────────────────────────────────────────────────────
+
+// ─────────────────────────────────────────────────────────────
+// AtividadesPreviewCard — preview rápido das atividades recentes
+// (visitas, ligações, pedidos, apresentações). Cada linha mostra
+// ícone tipado, título, cliente e horário. CTA "Ver todas" abre
+// o histórico completo (ActivityFullListScreen, Phase 3).
+// ─────────────────────────────────────────────────────────────
+const ATIVIDADES_PREVIEW = [
+  { type: 'visit',        icon: '🏥', tone: '#1e40af', title: 'Reunião com Dr. João Silva',         entity: 'Clínica Santa Mônica', time: '15:30',           tag: 'Positiva',   tagTone: 'good' },
+  { type: 'order',        icon: '📦', tone: '#16a373', title: 'Pedido de reposição',                entity: 'Hospital Central',     time: '10:05',           tag: 'R$ 4,8k',    tagTone: 'good' },
+  { type: 'call',         icon: '📞', tone: '#8b5cf6', title: 'Follow-up pedido #PED-2841',         entity: 'Dr. Roberto Alves',    time: '11:15',           tag: '12 min',     tagTone: 'info' },
+  { type: 'presentation', icon: '📊', tone: '#c6861b', title: 'Apresentação · Linha Cardio',        entity: 'Dra. Mariana Silva',   time: 'Ontem 09:00',     tag: 'Positiva',   tagTone: 'good' },
+];
+
+function AtividadesPreviewCard({ onSeeAll }) {
+  return (
+    <BICard pad={14}>
+      <BISectionTitle title="Atividades recentes"
+        right={
+          <button onClick={onSeeAll} style={{
+            all: 'unset', cursor: 'pointer',
+            display: 'inline-flex', alignItems: 'center', gap: 4,
+            fontSize: 11, fontWeight: 600, color: BI_COLOR.navy,
+          }}>
+            Ver todas <ChevronRight/>
+          </button>
+        }/>
+      <div style={{ display: 'flex', flexDirection: 'column' }}>
+        {ATIVIDADES_PREVIEW.map((a, i) => (
+          <div key={i} style={{
+            display: 'flex', alignItems: 'center', gap: 11,
+            padding: '10px 0',
+            borderTop: i === 0 ? 'none' : `1px solid ${BI_COLOR.lineSoft}`,
+          }}>
+            <div style={{
+              width: 34, height: 34, borderRadius: 10,
+              background: `${a.tone}14`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 16, flexShrink: 0,
+            }}>
+              {a.icon}
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{
+                fontSize: 12.5, fontWeight: 600, color: BI_COLOR.ink, letterSpacing: -0.1,
+                whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+              }}>
+                {a.title}
+              </div>
+              <div style={{
+                fontSize: 11, color: BI_COLOR.muted, marginTop: 1,
+                whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+              }}>
+                {a.entity} · {a.time}
+              </div>
+            </div>
+            <Tag tone={a.tagTone}>{a.tag}</Tag>
+          </div>
+        ))}
+      </div>
+      <button onClick={onSeeAll} style={{
+        width: '100%', marginTop: 12, padding: '10px 14px',
+        border: `1px solid ${BI_COLOR.line}`, borderRadius: 10,
+        background: '#fff', color: BI_COLOR.navy,
+        fontSize: 12.5, fontWeight: 700,
+        fontFamily: 'Inter, system-ui',
+        cursor: 'pointer',
+        display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+      }}>
+        Ver histórico completo <ChevronRight color={BI_COLOR.navy}/>
+      </button>
+    </BICard>
+  );
+}
+
 function MetaAtividadeCard({ goal, activity, dailyGoal, onActivity }) {
   const r = 28, c = 2 * Math.PI * r;
   const off = c - (goal.pct / 100) * c;
@@ -4347,24 +4422,272 @@ function ConversionVisitsList() {
   );
 }
 
-function ConversionDetailScreen({ onBack }) {
-  const [period, setPeriod] = React.useState('semana');
-  const summary = (
-    <div>
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-        <span style={{ fontSize: 28, fontWeight: 700, color: BI_COLOR.green, letterSpacing: -0.7, fontVariantNumeric: 'tabular-nums' }}>15%</span>
-        <Tag tone="good">+2pp vs sem. anterior</Tag>
+// Aggregate per-clinic conversion status from the per-visit log.
+// A clinic's status follows the most positive outcome it has in the
+// period: any "Convertida" wins; otherwise "Em decisão" wins over
+// "Sem conversão". Each row also carries the count of visits, the
+// most recent visit date, and the realized value (if converted).
+function _convAggregateByClinic(visits) {
+  const byClinic = new Map();
+  visits.forEach(v => {
+    const prev = byClinic.get(v.clinic) || {
+      clinic: v.clinic,
+      visits: 0,
+      lastDate: '',
+      lastTime: '',
+      lastDoctor: '',
+      doctors: new Set(),
+      value: 0,
+      outcomes: { Convertida: 0, 'Em decisão': 0, 'Sem conversão': 0 },
+    };
+    prev.visits += 1;
+    prev.outcomes[v.outcome] = (prev.outcomes[v.outcome] || 0) + 1;
+    prev.doctors.add(v.doctor);
+    if (v.value) prev.value += v.value;
+    // First entry wins as "last" because CONVERSION_VISITS is sorted desc.
+    if (!prev.lastDate) {
+      prev.lastDate = v.date;
+      prev.lastTime = v.time;
+      prev.lastDoctor = v.doctor;
+    }
+    byClinic.set(v.clinic, prev);
+  });
+  return Array.from(byClinic.values()).map(c => {
+    let status;
+    if (c.outcomes['Convertida'] > 0)        status = 'Convertida';
+    else if (c.outcomes['Em decisão'] > 0)   status = 'Em decisão';
+    else                                     status = 'Sem conversão';
+    return { ...c, status, doctors: Array.from(c.doctors) };
+  });
+}
+
+// Compact funnel chart that renders inside the DetailShell body.
+// Same idea as ConversionCard but tighter (no "Análise" CTA, since
+// we already are on the analysis screen).
+function _ConvFunnelCard({ data }) {
+  const maxW = 100;
+  const steps = [
+    { k: 'v', label: 'Visitas',     n: data.visits,      color: '#1e40af', w: maxW,                                                rate: null },
+    { k: 'i', label: 'Interesse',   n: data.interest,    color: '#c6861b', w: data.visits  ? (data.interest    / data.visits) * maxW : 0, rate: data.interestRate },
+    { k: 'c', label: 'Conversões',  n: data.conversions, color: '#16a373', w: data.visits  ? (data.conversions / data.visits) * maxW : 0, rate: data.conversionRate },
+  ];
+  return (
+    <div style={{
+      background: '#fff',
+      border: `1px solid ${BI_COLOR.line}`,
+      borderRadius: 14, padding: 14, marginBottom: 12,
+      fontFamily: 'Inter, system-ui',
+    }}>
+      <div style={{
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        marginBottom: 10,
+      }}>
+        <span style={{
+          fontSize: 10.5, fontWeight: 700, letterSpacing: 1.2,
+          textTransform: 'uppercase', color: BI_COLOR.faint,
+        }}>Funil de conversão</span>
+        <span style={{
+          display: 'inline-flex', alignItems: 'center', gap: 5,
+          fontSize: 10.5, fontWeight: 600, color: BI_COLOR.muted,
+        }}>
+          <InfoIcon size={11}/> visitas → interesse → pedido
+        </span>
       </div>
-      <div style={{ fontSize: 11.5, color: BI_COLOR.muted, marginTop: 2 }}>
-        Conversão = visitas que geraram pedido no período (21 de 142).
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
+        {steps.map((s) => (
+          <div key={s.k}>
+            <div style={{
+              display: 'flex', alignItems: 'baseline', justifyContent: 'space-between',
+              marginBottom: 4,
+            }}>
+              <span style={{ fontSize: 12, fontWeight: 600, color: BI_COLOR.ink }}>{s.label}</span>
+              <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 6 }}>
+                {s.rate !== null && (
+                  <span style={{
+                    fontSize: 10.5, fontWeight: 700,
+                    color: s.color,
+                    fontVariantNumeric: 'tabular-nums',
+                  }}>
+                    {s.rate}%
+                  </span>
+                )}
+                <span style={{
+                  fontSize: 13, fontWeight: 700, color: BI_COLOR.ink,
+                  fontVariantNumeric: 'tabular-nums',
+                }}>{s.n}</span>
+              </span>
+            </div>
+            <div style={{ height: 8, background: '#eef0f3', borderRadius: 4, overflow: 'hidden' }}>
+              <div style={{
+                width: `${s.w}%`, height: '100%', borderRadius: 4,
+                background: `linear-gradient(90deg, ${s.color}, ${s.color}cc)`,
+                transition: 'width 400ms ease',
+              }}/>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{
+        display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8,
+        marginTop: 12, paddingTop: 12, borderTop: `1px solid ${BI_COLOR.lineSoft}`,
+      }}>
+        <RatePill label="Taxa de interesse" value={data.interestRate} color="#c6861b"/>
+        <RatePill label="Taxa de conversão" value={data.conversionRate} color="#16a373"/>
       </div>
     </div>
   );
+}
+
+function ConversionDetailScreen({ onBack, focus, initialQuery = '', initialSort = 'recent' }) {
+  const [period, setPeriod] = React.useState('semana');
+  const [filter, setFilter] = React.useState(focus || 'todas');
+  const [query, setQuery]   = React.useState(initialQuery);
+  const [sortKey, setSort]  = React.useState(initialSort);
+  const c = BI_DATA.conversion;
+
+  // Aggregate per-clinic.
+  const clinicRows = React.useMemo(() => _convAggregateByClinic(CONVERSION_VISITS), []);
+
+  const counts = {
+    todas:       clinicRows.length,
+    convertidas: clinicRows.filter(r => r.status === 'Convertida').length,
+    decisao:     clinicRows.filter(r => r.status === 'Em decisão').length,
+    sem:         clinicRows.filter(r => r.status === 'Sem conversão').length,
+  };
+
+  const filters = [
+    { k: 'todas',       l: 'Todas' },
+    { k: 'convertidas', l: 'Convertidas' },
+    { k: 'decisao',     l: 'Em decisão' },
+    { k: 'sem',         l: 'Sem conversão' },
+  ];
+
+  const sortOptions = [
+    { k: 'recent',  l: 'Mais recentes' },
+    { k: 'value',   l: 'Maior valor' },
+    { k: 'visits',  l: 'Mais visitas' },
+    { k: 'clinic',  l: 'Clínica A–Z' },
+  ];
+
+  // Filter → search → sort.
+  let filtered = clinicRows.filter(r => {
+    if (filter === 'convertidas') return r.status === 'Convertida';
+    if (filter === 'decisao')     return r.status === 'Em decisão';
+    if (filter === 'sem')         return r.status === 'Sem conversão';
+    return true;
+  });
+
+  const q = query.trim().toLowerCase();
+  if (q) {
+    filtered = filtered.filter(r => {
+      const hay = (r.clinic + ' ' + r.doctors.join(' ') + ' ' + r.status).toLowerCase();
+      return hay.includes(q);
+    });
+  }
+
+  filtered = filtered.slice();
+  if (sortKey === 'recent') {
+    const dateRank = (k) => {
+      const i = COM_DATE_ORDER.indexOf(k);
+      return i === -1 ? 999 : i;
+    };
+    // We don't keep dateKey on the aggregate; fall back to original chronology
+    // (CONVERSION_VISITS is already sorted desc, so first-seen order works).
+    const order = clinicRows.map(r => r.clinic);
+    filtered.sort((a, b) => order.indexOf(a.clinic) - order.indexOf(b.clinic));
+  } else if (sortKey === 'value') {
+    filtered.sort((a, b) => (b.value || 0) - (a.value || 0));
+  } else if (sortKey === 'visits') {
+    filtered.sort((a, b) => b.visits - a.visits);
+  } else if (sortKey === 'clinic') {
+    filtered.sort((a, b) => a.clinic.localeCompare(b.clinic, 'pt-BR'));
+  }
+
+  const isFiltered = q || filter !== 'todas';
+
+  const summary = (
+    <div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{
+          width: 48, height: 48, borderRadius: 14,
+          background: 'linear-gradient(165deg, #16a373, #0f8a5f)', color: '#fff',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: 14, fontWeight: 700, fontVariantNumeric: 'tabular-nums', letterSpacing: -0.4,
+        }}>{c.conversionRate}%</div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 9.5, color: BI_COLOR.faint, fontWeight: 700, letterSpacing: 0.6, textTransform: 'uppercase' }}>
+            Conversão · Esta semana
+          </div>
+          <div style={{ fontSize: 16, fontWeight: 700, color: BI_COLOR.ink, marginTop: 2, letterSpacing: -0.2, fontVariantNumeric: 'tabular-nums' }}>
+            {c.conversions} de {c.visits} visitas viraram pedido
+          </div>
+        </div>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 6, marginTop: 12 }}>
+        <MiniMetric label="Convertidas"   value={String(counts.convertidas)} tone="good"/>
+        <MiniMetric label="Em decisão"    value={String(counts.decisao)}     tone="warn"/>
+        <MiniMetric label="Sem conversão" value={String(counts.sem)}         tone="bad"/>
+      </div>
+    </div>
+  );
+
   return (
-    <DetailShell kicker="Conversão · Detalhes" title="Análise de conversão"
-      summary={summary} period={period} onPeriod={setPeriod} onBack={onBack}>
-      <ConversionCard data={BI_DATA.conversion}/>
-      <ConversionVisitsList/>
+    <DetailShell kicker="Conversão · Atendimento" title="Análise de conversão"
+      summary={summary} period={period} onPeriod={setPeriod}
+      filters={filters} filterValue={filter} onFilter={setFilter} onBack={onBack}>
+      {/* Conversion funnel chart */}
+      <_ConvFunnelCard data={c}/>
+
+      {/* List header + sort */}
+      <div style={{
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        padding: '4px 2px 10px', fontFamily: 'Inter, system-ui',
+      }}>
+        <span style={{
+          fontSize: 10.5, fontWeight: 700, letterSpacing: 1.2, textTransform: 'uppercase',
+          color: BI_COLOR.faint,
+        }}>
+          Status por clínica · {filtered.length} {filtered.length === 1 ? 'clínica' : 'clínicas'}
+        </span>
+        <ComercialSort value={sortKey} options={sortOptions} onChange={setSort}/>
+      </div>
+
+      {/* Search */}
+      <div style={{ marginBottom: 12 }}>
+        <ComercialSearch value={query} onChange={setQuery}/>
+      </div>
+
+      {/* Per-clinic rows */}
+      {filtered.length === 0 ? (
+        <StateBlock
+          kind="empty"
+          title={isFiltered ? 'Sem resultados' : 'Sem clínicas no período'}
+          body={isFiltered
+            ? 'Ajuste a busca ou os filtros para ver mais clínicas.'
+            : 'Nenhuma clínica nas visitas desta semana.'}
+        />
+      ) : (
+        filtered.map((r, i) => {
+          const docPart = r.doctors.length === 1
+            ? r.doctors[0]
+            : `${r.doctors.length} médicos`;
+          const visitPart = `${r.visits} ${r.visits === 1 ? 'visita' : 'visitas'}`;
+          const lastPart = r.lastDate ? `última ${r.lastDate.toLowerCase()}` : '';
+          const valuePart = r.status === 'Convertida' && r.value > 0 ? _convFmtValue(r.value) : '';
+          const sub = [docPart, visitPart, lastPart, valuePart].filter(Boolean).join(' · ');
+          return (
+            <ItemRow
+              key={i}
+              title={r.clinic}
+              sub={sub}
+              tag={r.status}
+              tagTone={_convOutcomeTone(r.status)}
+            />
+          );
+        })
+      )}
     </DetailShell>
   );
 }
@@ -4756,6 +5079,11 @@ function MainDashboard() {
             onActivity={() => {}}/>
         </div>
 
+        {/* Atividades recentes — preview com CTA para o histórico completo */}
+        <div style={{ padding: '4px 16px 12px' }}>
+          <AtividadesPreviewCard onSeeAll={() => {}}/>
+        </div>
+
         {/* Território — also concentra status das clínicas (substituiu o
             mapa de calor). */}
         <div style={{ padding: '4px 16px 12px' }}>
@@ -4817,7 +5145,7 @@ function BIScreen({ initialView = { type: 'main' } }) {
     return <ActivityDetailScreen onBack={noop}/>;
   }
   if (view.type === 'conversion') {
-    return <ConversionDetailScreen onBack={noop}/>;
+    return <ConversionDetailScreen onBack={noop} focus={view.focus}/>;
   }
   if (view.type === 'data-quality') {
     return <DataQualityDetailScreen onBack={noop}/>;

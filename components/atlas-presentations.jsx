@@ -698,15 +698,30 @@ function PresentationDetailScreen({
             </button>
           </div>
         ) : (
-          <button style={{
-            width: '100%', height: 50, borderRadius: 14,
-            background: '#0a2f7f', color: '#fff', border: 'none',
-            fontSize: 15, fontWeight: 600, cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-          }}>
-            <DownloadIcon size={17}/>
-            Baixar {meta.label} · {p.size}
-          </button>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button style={{
+              flex: 1, height: 50, borderRadius: 14,
+              background: '#fff', color: '#0a2f7f',
+              border: '1.5px solid #d8dde7',
+              fontSize: 14.5, fontWeight: 600, cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
+            }}>
+              <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M1 8s2.5-5 7-5 7 5 7 5-2.5 5-7 5-7-5-7-5z"/>
+                <circle cx="8" cy="8" r="2"/>
+              </svg>
+              Visualizar
+            </button>
+            <button style={{
+              flex: 1, height: 50, borderRadius: 14,
+              background: '#0a2f7f', color: '#fff', border: 'none',
+              fontSize: 14.5, fontWeight: 600, cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
+            }}>
+              <DownloadIcon size={16}/>
+              Baixar
+            </button>
+          </div>
         )}
       </div>
     </div>
