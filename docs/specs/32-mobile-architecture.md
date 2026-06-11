@@ -262,3 +262,13 @@ All mobile-facing specs assume this architecture. Key cross-references:
 - Spec 13: Drift buffer for presentation events
 - Spec 22: `SyncService` + `SyncQueue` (offline-first sync)
 - Spec 31: `firebase_messaging` + `flutter_local_notifications`
+
+---
+
+## Linear Tickets
+
+| Ticket | Type | Title | Status |
+|--------|------|-------|--------|
+| [ATLAS-36](https://linear.app/atlasmed/issue/ATLAS-36/) | Parent | Spec 32: Flutter Mobile Scaffold | Backlog |
+| [ATLAS-37](https://linear.app/atlasmed/issue/ATLAS-37/) | [MOB] | Flutter scaffold — GoRouter, Riverpod, side drawer shell | Backlog |
+| [ATLAS-38](https://linear.app/atlasmed/issue/ATLAS-38/) | [MOB] | Flutter scaffold — Drift database & SyncService stub | Backlog |

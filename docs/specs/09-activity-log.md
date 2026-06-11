@@ -234,3 +234,15 @@ The Activity Log (this spec) is the representative's personal view of all their 
 2. Is the export scope the full history or only the currently filtered set?
 3. Are activity records editable after creation, or read-only?
 4. ~~Should managers see activity logs for their entire team from this screen?~~ **Resolved:** No — the Activity Log is rep-only in V1. It shows the authenticated user's own activity. Manager team activity visibility is handled by Spec 23 (Coverage & Execution Dashboard).
+
+---
+
+## Linear Tickets
+
+| Ticket | Type | Title | Status |
+|--------|------|-------|--------|
+| [ATLAS-99](https://linear.app/atlasmed/issue/ATLAS-99/) | Parent | Spec 09: Activity Log | Backlog |
+| [ATLAS-100](https://linear.app/atlasmed/issue/ATLAS-100/) | [BE] | Activity Log — model & capture middleware | Backlog |
+| [ATLAS-101](https://linear.app/atlasmed/issue/ATLAS-101/) | [WE] | Activity Log — manager team activity view | Backlog |
+| [ATLAS-102](https://linear.app/atlasmed/issue/ATLAS-102/) | [MOB] | Activity Log — rep activity feed | Backlog |
+| [ATLAS-179](https://linear.app/atlasmed/issue/ATLAS-179/) | [DESIGN] | Spec 09: Activity Log — rep & team activity feed UI | Backlog |

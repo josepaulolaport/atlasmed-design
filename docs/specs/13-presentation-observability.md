@@ -229,3 +229,15 @@ Device (offline)
 3. Should quality scores be visible to the representative, or only to managers?
 4. Are required slides configured per presentation version or per campaign?
 5. Is there a way for representatives to contest a low quality score?
+
+---
+
+## Linear Tickets
+
+| Ticket | Type | Title | Status |
+|--------|------|-------|--------|
+| [ATLAS-83](https://linear.app/atlasmed/issue/ATLAS-83/) | Parent | Spec 13: Presentation Observability | Backlog |
+| [ATLAS-84](https://linear.app/atlasmed/issue/ATLAS-84/) | [BE] | Presentation Observability — session & event models, analytics API | Backlog |
+| [ATLAS-85](https://linear.app/atlasmed/issue/ATLAS-85/) | [MOB] | Presentation Observability — Flutter event tracking | Backlog |
+| [ATLAS-158](https://linear.app/atlasmed/issue/ATLAS-158/) | [WE] | Presentation Observability — manager session review & engagement analytics | Backlog |
+| [ATLAS-173](https://linear.app/atlasmed/issue/ATLAS-173/) | [DESIGN] | Spec 13: Presentation Observability — analytics & session review UI | Backlog |

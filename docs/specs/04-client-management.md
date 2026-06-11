@@ -483,3 +483,15 @@ The health status chip (Saudável / Incompleto / Desatualizado / Crítico) shown
 4. Who manages the admin review queue for edit suggestions?
 5. Should "Novo pedido" and "Nova visita" from the detail screen pre-fill and return to the detail, or is it a full-screen flow?
 6. ~~What triggers the "Em risco" status for a clinic?~~ **Resolved:** "Em risco" is a computed label (not a stored status), defined above the ClinicStatus type. See also Spec 23 AC-COV-06 (60-day default threshold).
+
+---
+
+## Linear Tickets
+
+| Ticket | Type | Title | Status |
+|--------|------|-------|--------|
+| [ATLAS-39](https://linear.app/atlasmed/issue/ATLAS-39/) | Parent | Spec 04: Doctor Detail (completion) | Backlog |
+| [ATLAS-40](https://linear.app/atlasmed/issue/ATLAS-40/) | [BE] | Doctor Detail — detail & field notes API | Backlog |
+| [ATLAS-41](https://linear.app/atlasmed/issue/ATLAS-41/) | [WE] | Doctor Detail — web detail page | Backlog |
+| [ATLAS-42](https://linear.app/atlasmed/issue/ATLAS-42/) | [MOB] | Doctor Detail — Flutter screen & field notes | Backlog |
+| [ATLAS-165](https://linear.app/atlasmed/issue/ATLAS-165/) | [DESIGN] | Spec 04: Doctor Detail — web doctor detail page | Backlog |

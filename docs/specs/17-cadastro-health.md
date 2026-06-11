@@ -200,3 +200,15 @@ interface FieldDefinition {
 2. Who can approve that a record's data is fresh without submitting a change (the rep, the manager)?
 3. Should records with `critical` health be excluded from certain workflows (e.g. cannot create an order for a clinic with a missing CNPJ)?
 4. Is there a report that shows which representative has the most critical-health records in their territory?
+
+---
+
+## Linear Tickets
+
+| Ticket | Type | Title | Status |
+|--------|------|-------|--------|
+| [ATLAS-46](https://linear.app/atlasmed/issue/ATLAS-46/) | Parent | Spec 17: Cadastro Health | Backlog |
+| [ATLAS-47](https://linear.app/atlasmed/issue/ATLAS-47/) | [BE] | Cadastro Health — enrichment API & health score | Backlog |
+| [ATLAS-48](https://linear.app/atlasmed/issue/ATLAS-48/) | [MOB] | Cadastro Health — rep confirm/reject flow | Backlog |
+| [ATLAS-49](https://linear.app/atlasmed/issue/ATLAS-49/) | [WE] | Cadastro Health — admin health data view | Backlog |
+| [ATLAS-167](https://linear.app/atlasmed/issue/ATLAS-167/) | [DESIGN] | Spec 17: Cadastro Health — admin health dashboard | Backlog |

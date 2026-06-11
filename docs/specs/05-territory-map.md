@@ -399,3 +399,13 @@ The follow-ups list (AC-MAP-29–31) renders the data model defined in [Spec 30 
 4. Can representatives start a visit without geofence detection (manual override)?
 5. Should follow-ups created from the map be visible in the Activity Log and the BI dashboard?
 6. What is the definition of "Prioridade alta" — is it a computed score or a manual flag?
+
+---
+
+## Linear Tickets
+
+| Ticket | Type | Title | Status |
+|--------|------|-------|--------|
+| [ATLAS-103](https://linear.app/atlasmed/issue/ATLAS-103/) | Parent | Spec 05: Territory Map | Backlog |
+| [ATLAS-104](https://linear.app/atlasmed/issue/ATLAS-104/) | [BE] | Territory Map — geo-indexed customer API | Backlog |
+| [ATLAS-105](https://linear.app/atlasmed/issue/ATLAS-105/) | [MOB] | Territory Map — Flutter flutter_map with customer pins | Backlog |

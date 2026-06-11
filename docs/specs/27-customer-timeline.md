@@ -127,3 +127,15 @@ interface CustomerTimelineEvent {
 1. Should timeline events be created in real time (synchronous) or via an event bus (asynchronous)?
 2. Should the timeline be accessible as a standalone screen or only from within a customer profile?
 3. Can managers add comments to timeline events for coaching purposes?
+
+---
+
+## Linear Tickets
+
+| Ticket | Type | Title | Status |
+|--------|------|-------|--------|
+| [ATLAS-92](https://linear.app/atlasmed/issue/ATLAS-92/) | Parent | Spec 27: Customer Timeline | Backlog |
+| [ATLAS-93](https://linear.app/atlasmed/issue/ATLAS-93/) | [BE] | Customer Timeline — aggregation API | Backlog |
+| [ATLAS-94](https://linear.app/atlasmed/issue/ATLAS-94/) | [WE] | Customer Timeline — web timeline component | Backlog |
+| [ATLAS-95](https://linear.app/atlasmed/issue/ATLAS-95/) | [MOB] | Customer Timeline — Flutter timeline tab | Backlog |
+| [ATLAS-177](https://linear.app/atlasmed/issue/ATLAS-177/) | [DESIGN] | Spec 27: Customer Timeline — web timeline component | Backlog |

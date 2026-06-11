@@ -144,3 +144,15 @@ interface SegmentQualityConfig {
 2. Should the score be visible to the representative immediately after saving the visit, or only after a configurable delay?
 3. ~~Should there be a "minimum quality threshold" that triggers a notification to the manager?~~ **Resolved (deferred):** No push notification for low quality scores in V1. Managers surface this via the Coverage & Execution Dashboard (Spec 23) and Coaching Dashboard (Spec 24). A `visit_quality_alert` notification type may be added in V2 if coaching adoption is low.
 4. Are there legal or union considerations around using quality scores for performance evaluation?
+
+---
+
+## Linear Tickets
+
+| Ticket | Type | Title | Status |
+|--------|------|-------|--------|
+| [ATLAS-89](https://linear.app/atlasmed/issue/ATLAS-89/) | Parent | Spec 28: Visit Quality Score | Backlog |
+| [ATLAS-90](https://linear.app/atlasmed/issue/ATLAS-90/) | [BE] | Visit Quality Score — computation engine & API | Backlog |
+| [ATLAS-91](https://linear.app/atlasmed/issue/ATLAS-91/) | [MOB] | Visit Quality Score — Flutter post-visit score card | Backlog |
+| [ATLAS-163](https://linear.app/atlasmed/issue/ATLAS-163/) | [WE] | Visit Quality Score — manager quality reports & admin rule configuration | Backlog |
+| [ATLAS-178](https://linear.app/atlasmed/issue/ATLAS-178/) | [DESIGN] | Spec 28: Visit Quality Score — quality dashboard & rule config UI | Backlog |

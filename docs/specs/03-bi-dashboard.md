@@ -352,3 +352,13 @@ The visit counts displayed in this spec (visit goal progress, activity detail) S
 3. What is the data refresh cadence (pull-to-refresh, polling, WebSocket)?
 4. Are territory coverage percentages based on visit frequency or order frequency?
 5. ~~What constitutes a "conversion"?~~ **Resolved:** A conversion is an order placed within **30 days** of an effective visit to that clinic/doctor. The funnel uses effective visit count as the denominator. Spec 06 (Orders) is required for this metric to work.
+
+---
+
+## Linear Tickets
+
+| Ticket | Type | Title | Status |
+|--------|------|-------|--------|
+| [ATLAS-96](https://linear.app/atlasmed/issue/ATLAS-96/) | Parent | Spec 03: BI / Performance Dashboard | Backlog |
+| [ATLAS-97](https://linear.app/atlasmed/issue/ATLAS-97/) | [BE] | BI Dashboard — performance aggregation API | Backlog |
+| [ATLAS-98](https://linear.app/atlasmed/issue/ATLAS-98/) | [MOB] | BI Dashboard — Flutter performance charts | Backlog |

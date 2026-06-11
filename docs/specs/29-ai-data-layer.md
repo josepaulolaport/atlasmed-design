@@ -133,3 +133,11 @@ New feature specs SHALL reference this spec and confirm their data model complie
 1. Should AI capabilities be built in-house or via an LLM API integration (e.g. OpenAI, Anthropic)?
 2. ~~Is there a data retention policy that conflicts with "never destroy history"? (LGPD right to erasure)~~ **Resolved:** PRINCIPLE-AI-03A — anonymisation path. See above.
 3. At what scale (customer count, visit count per day) does the denormalized read model strategy need to be supplemented by a vector database or dedicated analytics warehouse?
+
+---
+
+## Linear Tickets
+
+| Ticket | Type | Title | Status |
+|--------|------|-------|--------|
+| [ATLAS-132](https://linear.app/atlasmed/issue/ATLAS-132/) | Parent | Spec 29: AI-Ready Structured Data Layer (Engineering Standard) | Backlog |

@@ -127,3 +127,14 @@ interface RepresentativeCoachingProfile {
 1. Should the manager be able to leave a coaching note tied to a specific visit or metric, visible to the representative?
 2. Should coaching scores be visible to the representative themselves, or managers only?
 3. Is there a planned V2 AI layer that generates coaching summaries in natural language?
+
+---
+
+## Linear Tickets
+
+| Ticket | Type | Title | Status |
+|--------|------|-------|--------|
+| [ATLAS-113](https://linear.app/atlasmed/issue/ATLAS-113/) | Parent | Spec 24: Manager Coaching Tools | Backlog |
+| [ATLAS-114](https://linear.app/atlasmed/issue/ATLAS-114/) | [BE] | Manager Coaching — coaching notes & accompaniment API | Backlog |
+| [ATLAS-115](https://linear.app/atlasmed/issue/ATLAS-115/) | [WE] | Manager Coaching — coaching web UI | Backlog |
+| [ATLAS-182](https://linear.app/atlasmed/issue/ATLAS-182/) | [DESIGN] | Spec 24: Manager Coaching — coaching tools UI | Backlog |

@@ -309,3 +309,15 @@ When a representative opens a presentation **from within a visit log flow** (Spe
 3. What is the maximum file size that should be supported?
 4. Should download history be synced across devices for the same user?
 5. Is there an analytics requirement to track which presentations were opened/shared and with whom?
+
+---
+
+## Linear Tickets
+
+| Ticket | Type | Title | Status |
+|--------|------|-------|--------|
+| [ATLAS-66](https://linear.app/atlasmed/issue/ATLAS-66/) | Parent | Spec 07: Presentations | Backlog |
+| [ATLAS-67](https://linear.app/atlasmed/issue/ATLAS-67/) | [BE] | Presentations — material model, S3 upload API & versioning | Backlog |
+| [ATLAS-68](https://linear.app/atlasmed/issue/ATLAS-68/) | [WE] | Presentations — admin upload & material management UI | Backlog |
+| [ATLAS-69](https://linear.app/atlasmed/issue/ATLAS-69/) | [MOB] | Presentations — Flutter viewer, download & offline playback | Backlog |
+| [ATLAS-172](https://linear.app/atlasmed/issue/ATLAS-172/) | [DESIGN] | Spec 07: Presentations — admin material management UI | Backlog |

@@ -402,3 +402,15 @@ Account deletion requests are processed through [Spec 21 — Requests & Approval
 4. How is account deletion handled for LGPD compliance — immediate, or scheduled with a grace period?
 5. Should territory data on the profile (clinic/doctor counts) be pulled from the same API as the BI dashboard?
 6. ~~Are notification preferences synced to a push notification backend or only stored locally?~~ **Resolved:** Preferences are stored server-side via `PATCH /api/v1/notifications/preferences` (Spec 31 AC-NOT-07). The Flutter app reads them on sync; the server enforces them when routing pushes.
+
+---
+
+## Linear Tickets
+
+| Ticket | Type | Title | Status |
+|--------|------|-------|--------|
+| [ATLAS-129](https://linear.app/atlasmed/issue/ATLAS-129/) | Parent | Spec 08: Profile & Settings | Backlog |
+| [ATLAS-130](https://linear.app/atlasmed/issue/ATLAS-130/) | [BE] | Profile & Settings — work hours & preferences API | Backlog |
+| [ATLAS-131](https://linear.app/atlasmed/issue/ATLAS-131/) | [MOB] | Profile & Settings — Flutter profile screen & all sub-screens | Backlog |
+| [ATLAS-156](https://linear.app/atlasmed/issue/ATLAS-156/) | [WE] | Profile & Settings — web preferences & account settings | Backlog |
+| [ATLAS-166](https://linear.app/atlasmed/issue/ATLAS-166/) | [DESIGN] | Spec 08: Profile & Settings — web preferences screens | Backlog |

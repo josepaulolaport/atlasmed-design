@@ -208,3 +208,15 @@ The agenda and map are complementary:
 3. Should the agenda integrate with native calendar apps (iOS Calendar, Google Calendar)? — **Deferred to V2; not in MVP scope.**
 4. Can a planned visit be moved to a different day by drag-and-drop?
 5. Should the "unplanned customer suggestions" rank be customizable per manager?
+
+---
+
+## Linear Tickets
+
+| Ticket | Type | Title | Status |
+|--------|------|-------|--------|
+| [ATLAS-63](https://linear.app/atlasmed/issue/ATLAS-63/) | Parent | Spec 15: Agenda Planning | Backlog |
+| [ATLAS-64](https://linear.app/atlasmed/issue/ATLAS-64/) | [BE] | Agenda Planning — AgendaItem model & planning API | Backlog |
+| [ATLAS-65](https://linear.app/atlasmed/issue/ATLAS-65/) | [MOB] | Agenda Planning — Flutter calendar & scheduling | Backlog |
+| [ATLAS-159](https://linear.app/atlasmed/issue/ATLAS-159/) | [WE] | Agenda Planning — manager read-only team agenda view | Backlog |
+| [ATLAS-171](https://linear.app/atlasmed/issue/ATLAS-171/) | [DESIGN] | Spec 15: Agenda Planning — manager team calendar UI | Backlog |

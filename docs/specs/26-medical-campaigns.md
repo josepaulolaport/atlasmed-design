@@ -142,3 +142,15 @@ interface CampaignExecution {
 1. Can a representative opt out of a campaign for a specific customer (e.g. customer asked not to be approached about that product)?
 2. Should campaign performance be visible to representatives, or managers and admins only?
 3. Can campaigns overlap on the same product? How is priority determined?
+
+---
+
+## Linear Tickets
+
+| Ticket | Type | Title | Status |
+|--------|------|-------|--------|
+| [ATLAS-119](https://linear.app/atlasmed/issue/ATLAS-119/) | Parent | Spec 26: Medical Campaigns | Backlog |
+| [ATLAS-120](https://linear.app/atlasmed/issue/ATLAS-120/) | [BE] | Medical Campaigns — campaign model, targeting & launch API | Backlog |
+| [ATLAS-121](https://linear.app/atlasmed/issue/ATLAS-121/) | [WE] | Medical Campaigns — admin campaign builder | Backlog |
+| [ATLAS-122](https://linear.app/atlasmed/issue/ATLAS-122/) | [MOB] | Medical Campaigns — campaign card in pre-visit briefing | Backlog |
+| [ATLAS-184](https://linear.app/atlasmed/issue/ATLAS-184/) | [DESIGN] | Spec 26: Medical Campaigns — admin campaign builder UI | Backlog |

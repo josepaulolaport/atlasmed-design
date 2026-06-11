@@ -273,3 +273,13 @@ status:
 3. Who has permission to edit a visit record after it has been saved — the registering rep, their manager, or admin only?
 4. ~~Should ineffective visits count toward a partial credit?~~ **Resolved:** No. Only effective visits count. No partial credit, no override. See AC-VL-09.
 5. Is there a visit correction request flow that ties into Spec 21 (Requests & Approvals)?
+
+---
+
+## Linear Tickets
+
+| Ticket | Type | Title | Status |
+|--------|------|-------|--------|
+| [ATLAS-54](https://linear.app/atlasmed/issue/ATLAS-54/) | Parent | Spec 11: Visit Lifecycle & Frequency Targets | Backlog |
+| [ATLAS-55](https://linear.app/atlasmed/issue/ATLAS-55/) | [BE] | Visit Lifecycle — Visit model, state machine & frequency API | Backlog |
+| [ATLAS-56](https://linear.app/atlasmed/issue/ATLAS-56/) | [MOB] | Visit Lifecycle — Flutter visit registration flow | Backlog |

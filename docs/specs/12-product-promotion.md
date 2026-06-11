@@ -241,3 +241,15 @@ interface StructuredComment {
 3. Should structured comments be translatable per language setting (Spec 08)?
 4. Is there a maximum number of structured comments selectable per product per visit?
 5. Should interest level feed directly into the customer segmentation model (Spec 16)?
+
+---
+
+## Linear Tickets
+
+| Ticket | Type | Title | Status |
+|--------|------|-------|--------|
+| [ATLAS-60](https://linear.app/atlasmed/issue/ATLAS-60/) | Parent | Spec 12: Product Promotion | Backlog |
+| [ATLAS-61](https://linear.app/atlasmed/issue/ATLAS-61/) | [BE] | Product Promotion — Product model, promotion API & comment aggregation | Backlog |
+| [ATLAS-62](https://linear.app/atlasmed/issue/ATLAS-62/) | [MOB] | Product Promotion — Flutter promotion form during visit | Backlog |
+| [ATLAS-157](https://linear.app/atlasmed/issue/ATLAS-157/) | [WE] | Product Promotion — admin product catalog & promotion analytics | Backlog |
+| [ATLAS-170](https://linear.app/atlasmed/issue/ATLAS-170/) | [DESIGN] | Spec 12: Product Promotion — admin catalog & analytics UI | Backlog |

@@ -212,3 +212,13 @@ The pre-visit view is accessible from:
 3. Should AI-generated suggestions (V2) appear in the same view, or as a separate "AI mode"?
 4. How far back should "last visit" look — most recent overall, or most recent in the current segment?
 5. ~~Should the pre-visit view be available as a standalone notification?~~ **Resolved:** The `visit_reminder` notification (Spec 31) deep-links directly to the pre-visit intelligence screen for the scheduled visit. The notification title is "Visita agendada para hoje" and the deep-link resolves to `/visits/:visitId/briefing`.
+
+---
+
+## Linear Tickets
+
+| Ticket | Type | Title | Status |
+|--------|------|-------|--------|
+| [ATLAS-86](https://linear.app/atlasmed/issue/ATLAS-86/) | Parent | Spec 14: Pre-Visit Intelligence | Backlog |
+| [ATLAS-87](https://linear.app/atlasmed/issue/ATLAS-87/) | [BE] | Pre-Visit Intelligence — briefing API | Backlog |
+| [ATLAS-88](https://linear.app/atlasmed/issue/ATLAS-88/) | [MOB] | Pre-Visit Intelligence — Flutter briefing screen | Backlog |

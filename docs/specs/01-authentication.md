@@ -240,3 +240,14 @@ When a user's session token is issued after successful login, it SHALL include t
 3. Is biometric authentication (Face ID / fingerprint) in scope for MVP?
 4. What is the OTP expiry window?
 5. Does password reset require the user to be logged out first, or can authenticated users also access it?
+
+---
+
+## Linear Tickets
+
+| Ticket | Type | Title | Status |
+|--------|------|-------|--------|
+| [ATLAS-124](https://linear.app/atlasmed/issue/ATLAS-124/) | Parent | Spec 01: Authentication (Flutter mobile) | Backlog |
+| [ATLAS-125](https://linear.app/atlasmed/issue/ATLAS-125/) | [MOB] | Authentication — Flutter auth screens & session flow | Backlog |
+| [ATLAS-126](https://linear.app/atlasmed/issue/ATLAS-126/) | [BE] | Authentication — 2FA recovery codes | Backlog |
+| [ATLAS-150](https://linear.app/atlasmed/issue/ATLAS-150/) | [BE] | Authentication — API fully implemented (backend complete) | Done |

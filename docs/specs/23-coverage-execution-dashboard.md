@@ -187,3 +187,15 @@ interface NotVisitedCustomer {
 2. ~~Should this replace or extend Spec 03?~~ **Resolved:** Extend — Spec 23 is the manager's team view; Spec 03 is the rep's personal view. Both exist. See overview note.
 3. Can representatives see each other's metrics, or only their own?
 4. Is there a drill-through from "not visited" list to the agenda to immediately plan a visit?
+
+---
+
+## Linear Tickets
+
+| Ticket | Type | Title | Status |
+|--------|------|-------|--------|
+| [ATLAS-110](https://linear.app/atlasmed/issue/ATLAS-110/) | Parent | Spec 23: Coverage & Execution Dashboard (Manager) | Backlog |
+| [ATLAS-111](https://linear.app/atlasmed/issue/ATLAS-111/) | [BE] | Coverage Dashboard — team metrics API | Backlog |
+| [ATLAS-112](https://linear.app/atlasmed/issue/ATLAS-112/) | [WE] | Coverage Dashboard — manager web view | Backlog |
+| [ATLAS-185](https://linear.app/atlasmed/issue/ATLAS-185/) | [MOB] | Coverage Dashboard — Flutter rep personal coverage & team drill-down | Backlog |
+| [ATLAS-181](https://linear.app/atlasmed/issue/ATLAS-181/) | [DESIGN] | Spec 23: Coverage Dashboard — manager execution dashboard UI | Backlog |

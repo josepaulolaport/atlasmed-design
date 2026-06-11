@@ -188,3 +188,15 @@ interface ConsentPolicyVersion {
 3. Should WhatsApp consent include a specific WABA template opt-in for WhatsApp Business API?
 4. Can a representative capture consent on behalf of a doctor who is not physically present (e.g. over the phone)?
 5. Does consent data need to be exported for LGPD data subject access requests (DSAR)?
+
+---
+
+## Linear Tickets
+
+| Ticket | Type | Title | Status |
+|--------|------|-------|--------|
+| [ATLAS-43](https://linear.app/atlasmed/issue/ATLAS-43/) | Parent | Spec 18: Consent & Communication Management (LGPD) | Backlog |
+| [ATLAS-44](https://linear.app/atlasmed/issue/ATLAS-44/) | [BE] | Consent — ConsentRecord model & API | Backlog |
+| [ATLAS-45](https://linear.app/atlasmed/issue/ATLAS-45/) | [MOB] | Consent — Flutter capture flow during visit | Backlog |
+| [ATLAS-160](https://linear.app/atlasmed/issue/ATLAS-160/) | [WE] | Consent & LGPD — compliance reporting & consent history | Backlog |
+| [ATLAS-168](https://linear.app/atlasmed/issue/ATLAS-168/) | [DESIGN] | Spec 18: Consent & LGPD — compliance reporting UI | Backlog |

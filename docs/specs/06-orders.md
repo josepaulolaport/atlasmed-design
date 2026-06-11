@@ -347,3 +347,15 @@ The product catalog shown during order creation SHALL apply the two-dimensional 
 4. Is cancellation only allowed before "Em separação" (processing) or also after?
 5. Should the new-order flow be accessible from within a clinic/doctor detail screen?
 6. Are orders tied to a specific contract or price table per clinic?
+
+---
+
+## Linear Tickets
+
+| Ticket | Type | Title | Status |
+|--------|------|-------|--------|
+| [ATLAS-106](https://linear.app/atlasmed/issue/ATLAS-106/) | Parent | Spec 06: Orders | Backlog |
+| [ATLAS-107](https://linear.app/atlasmed/issue/ATLAS-107/) | [BE] | Orders — Order model & placement API | Backlog |
+| [ATLAS-108](https://linear.app/atlasmed/issue/ATLAS-108/) | [WE] | Orders — admin/manager order management | Backlog |
+| [ATLAS-109](https://linear.app/atlasmed/issue/ATLAS-109/) | [MOB] | Orders — Flutter order placement screen | Backlog |
+| [ATLAS-180](https://linear.app/atlasmed/issue/ATLAS-180/) | [DESIGN] | Spec 06: Orders — admin/manager order management UI | Backlog |

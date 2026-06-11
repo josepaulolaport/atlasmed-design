@@ -220,3 +220,15 @@ interface ScoringRule {
 4. Should the classification influence the priority indicator on the customer list card directly?
 
 > **Survey versioning:** Resolved. Free edit with `templateSnapshot` on each result. See AC-CS-03 and `SurveyResult.templateSnapshot`. Offline: Drift `survey_results` stores `templateSnapshot` as a JSON text column (Spec 32).
+
+---
+
+## Linear Tickets
+
+| Ticket | Type | Title | Status |
+|--------|------|-------|--------|
+| [ATLAS-76](https://linear.app/atlasmed/issue/ATLAS-76/) | Parent | Spec 16: Customer Segmentation Surveys | Backlog |
+| [ATLAS-77](https://linear.app/atlasmed/issue/ATLAS-77/) | [BE] | Surveys — template model, response API & snapshot storage | Backlog |
+| [ATLAS-78](https://linear.app/atlasmed/issue/ATLAS-78/) | [WE] | Surveys — admin template builder | Backlog |
+| [ATLAS-79](https://linear.app/atlasmed/issue/ATLAS-79/) | [MOB] | Surveys — Flutter offline survey form | Backlog |
+| [ATLAS-174](https://linear.app/atlasmed/issue/ATLAS-174/) | [DESIGN] | Spec 16: Surveys — admin template builder UI | Backlog |

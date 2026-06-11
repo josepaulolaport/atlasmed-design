@@ -206,3 +206,15 @@ interface RequestHistoryEvent {
 1. Should there be a configurable SLA (e.g. requests unanswered after 5 days are escalated)?
 2. Can a request be reassigned to a different reviewer by the admin?
 3. Should there be an in-app comment thread on a request (back-and-forth between requester and reviewer)?
+
+---
+
+## Linear Tickets
+
+| Ticket | Type | Title | Status |
+|--------|------|-------|--------|
+| [ATLAS-50](https://linear.app/atlasmed/issue/ATLAS-50/) | Parent | Spec 21: Requests & Approvals (full model) | Backlog |
+| [ATLAS-51](https://linear.app/atlasmed/issue/ATLAS-51/) | [BE] | Requests & Approvals — approval engine & API | Backlog |
+| [ATLAS-52](https://linear.app/atlasmed/issue/ATLAS-52/) | [WE] | Requests & Approvals — manager approval queue | Backlog |
+| [ATLAS-53](https://linear.app/atlasmed/issue/ATLAS-53/) | [MOB] | Requests & Approvals — rep submission & status | Backlog |
+| [ATLAS-169](https://linear.app/atlasmed/issue/ATLAS-169/) | [DESIGN] | Spec 21: Requests & Approvals — manager approval queue UI | Backlog |

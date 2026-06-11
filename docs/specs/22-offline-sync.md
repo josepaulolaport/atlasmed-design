@@ -211,3 +211,13 @@ interface SyncState {
 2. What is the maximum age of pre-cached customer profiles (TTL)?
 3. Should managers have offline access to their team's data, or only their own?
 4. Should offline-created visits be visible to managers immediately after sync, or only after a confirmation step?
+
+---
+
+## Linear Tickets
+
+| Ticket | Type | Title | Status |
+|--------|------|-------|--------|
+| [ATLAS-80](https://linear.app/atlasmed/issue/ATLAS-80/) | Parent | Spec 22: Offline Sync | Backlog |
+| [ATLAS-81](https://linear.app/atlasmed/issue/ATLAS-81/) | [BE] | Offline Sync — batch endpoint & delta pull | Backlog |
+| [ATLAS-82](https://linear.app/atlasmed/issue/ATLAS-82/) | [MOB] | Offline Sync — Flutter SyncService & status UI | Backlog |

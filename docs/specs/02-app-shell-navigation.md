@@ -227,3 +227,13 @@ All notifications respect the two-dimensional authorization rule (Spec 10): a no
 2. Should the top bar show a back arrow instead of the hamburger on detail screens?
 3. Are there role-based sections that should be hidden from certain users (e.g. managers vs. reps)?
 4. Is there a notification badge on any navigation item?
+
+---
+
+## Linear Tickets
+
+| Ticket | Type | Title | Status |
+|--------|------|-------|--------|
+| [ATLAS-127](https://linear.app/atlasmed/issue/ATLAS-127/) | Parent | Spec 02: App Shell & Navigation (Flutter mobile completion) | Backlog |
+| [ATLAS-128](https://linear.app/atlasmed/issue/ATLAS-128/) | [MOB] | App Shell — theme toggle, logout, notification badge & deep-link guard | Backlog |
+| [ATLAS-151](https://linear.app/atlasmed/issue/ATLAS-151/) | [WE] | App Shell & Navigation — web implementation complete | Done |

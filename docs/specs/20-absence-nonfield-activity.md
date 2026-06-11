@@ -147,3 +147,15 @@ interface AbsenceRecord {
 2. Does manager accompaniment count as a field activity (generating a visit record) or only as a non-field entry?
 3. Should absences sync to an HR system, or is this CRM-internal only?
 4. Is there a maximum consecutive absence days before automatic escalation?
+
+---
+
+## Linear Tickets
+
+| Ticket | Type | Title | Status |
+|--------|------|-------|--------|
+| [ATLAS-73](https://linear.app/atlasmed/issue/ATLAS-73/) | Parent | Spec 20: Absence Management | Backlog |
+| [ATLAS-74](https://linear.app/atlasmed/issue/ATLAS-74/) | [BE] | Absence Management — model & approval routing | Backlog |
+| [ATLAS-75](https://linear.app/atlasmed/issue/ATLAS-75/) | [MOB] | Absence Management — Flutter request form & calendar block | Backlog |
+| [ATLAS-162](https://linear.app/atlasmed/issue/ATLAS-162/) | [WE] | Absence Management — manager team calendar & approval queue | Backlog |
+| [ATLAS-176](https://linear.app/atlasmed/issue/ATLAS-176/) | [DESIGN] | Spec 20: Absence Management — manager calendar & approval UI | Backlog |

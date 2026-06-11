@@ -292,3 +292,13 @@ Every other spec in this system references market segmentation implicitly. The f
 3. Should segment names be localized (e.g. "Ortopedia" in pt-BR, "Orthopedics" in en-US)?
 4. Is there an "unrestricted" segment concept for shared resources (e.g. institutional presentations visible to all segments)?
 5. How are segment assignments made for newly imported customers (via CRM migration or external data sync)?
+
+---
+
+## Linear Tickets
+
+| Ticket | Type | Title | Status |
+|--------|------|-------|--------|
+| [ATLAS-30](https://linear.app/atlasmed/issue/ATLAS-30/) | Parent | Spec 10: Market Segmentation & Visibility | Backlog |
+| [ATLAS-31](https://linear.app/atlasmed/issue/ATLAS-31/) | [BE] | Market Segmentation — API, models & scope enforcement | Backlog |
+| [ATLAS-32](https://linear.app/atlasmed/issue/ATLAS-32/) | [WE] | Market Segmentation — Admin assignment UI | Backlog |

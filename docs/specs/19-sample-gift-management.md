@@ -185,3 +185,15 @@ interface ReplenishmentRequest {
 2. Is there a monetary value associated with samples for budget tracking?
 3. Can a manager manually adjust a representative's inventory balance without a formal replenishment request?
 4. Should delivery records be visible to the receiving doctor/clinic in a future portal?
+
+---
+
+## Linear Tickets
+
+| Ticket | Type | Title | Status |
+|--------|------|-------|--------|
+| [ATLAS-70](https://linear.app/atlasmed/issue/ATLAS-70/) | Parent | Spec 19: Sample & Inventory Control | Backlog |
+| [ATLAS-71](https://linear.app/atlasmed/issue/ATLAS-71/) | [BE] | Sample & Inventory — model, transaction log & low-stock alert | Backlog |
+| [ATLAS-72](https://linear.app/atlasmed/issue/ATLAS-72/) | [MOB] | Sample & Inventory — Flutter inventory view & delivery recording | Backlog |
+| [ATLAS-161](https://linear.app/atlasmed/issue/ATLAS-161/) | [WE] | Sample & Inventory — manager oversight & replenishment approval | Backlog |
+| [ATLAS-175](https://linear.app/atlasmed/issue/ATLAS-175/) | [DESIGN] | Spec 19: Sample & Inventory — manager oversight UI | Backlog |

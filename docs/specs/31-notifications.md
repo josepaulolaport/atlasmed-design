@@ -236,3 +236,13 @@ Notification content (title, body, entityId) is resolved after segment/territory
 
 1. Should notifications have an expiry (e.g. auto-delete after 90 days)?
 2. ~~Should managers receive `follow_up_due` for their team's follow-ups, or only their own?~~ **Resolved:** Managers do NOT receive `follow_up_due` push notifications for their team in V1. Team-level overdue follow-ups are visible in the Coverage & Execution Dashboard (Spec 23) and Coaching Dashboard (Spec 24). This avoids notification spam for managers with large teams.
+
+---
+
+## Linear Tickets
+
+| Ticket | Type | Title | Status |
+|--------|------|-------|--------|
+| [ATLAS-33](https://linear.app/atlasmed/issue/ATLAS-33/) | Parent | Spec 31: Notifications Infrastructure | Backlog |
+| [ATLAS-34](https://linear.app/atlasmed/issue/ATLAS-34/) | [BE] | Notifications — FCM delivery, models & preference API | Backlog |
+| [ATLAS-35](https://linear.app/atlasmed/issue/ATLAS-35/) | [MOB] | Notifications — Flutter inbox, badge & deep-link routing | Backlog |

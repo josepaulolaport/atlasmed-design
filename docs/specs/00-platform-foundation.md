@@ -284,7 +284,7 @@ Full `AuditLog` model with eventType, severity, actor, resource, IP, sessionId, 
 | POST | `/registry-suggestions/:id/approve` | Approve |
 | POST | `/registry-suggestions/:id/reject` | Reject |
 
-**Current source:** MockRegistrySourceAdapter (JSON fixtures) — no real registry adapter yet.
+**Current source:** MockRegistrySourceAdapter (JSON fixtures) — no real registry adapter yet. Real-world adapters for CNES, AMB, and CFM are defined in [Spec 33 — Data Ingestion](./33-data-ingestion.md).
 
 > **Relationship to Spec 21 (Requests & Approvals):** The registry suggestions workflow is the **existing implementation** of the broader approval concept. When Spec 21 is built, the registry suggestions workflow will become one of its `requestType` instances (type: `data_correction` or `CLINIC_REMOVAL`). The existing `IngestionSuggestion` table and review API should be unified with the Spec 21 approval engine over time.
 
@@ -424,3 +424,23 @@ The current system stores `territoryId` as a bare string on `Clinic` and in `Use
 6. **Suggestion-gated destructive changes** — registry never auto-deletes CRM data
 7. **Refresh token rotation with reuse detection** — invalidates full session chain on theft
 8. **CASL for authorization** — role abilities + instance grants merged at request time
+
+---
+
+## Linear Tickets
+
+| Ticket | Type | Title | Status |
+|--------|------|-------|--------|
+| [ATLAS-137](https://linear.app/atlasmed/issue/ATLAS-137/) | Parent | Platform Foundation — Core Implementation (F-001 to F-018) | Done |
+| [ATLAS-138](https://linear.app/atlasmed/issue/ATLAS-138/) | [BE] | Authentication API — login, JWT sessions, refresh rotation, logout | Done |
+| [ATLAS-139](https://linear.app/atlasmed/issue/ATLAS-139/) | [BE] | Two-factor authentication — TOTP setup, verify, disable | Done |
+| [ATLAS-140](https://linear.app/atlasmed/issue/ATLAS-140/) | [BE] | User management — invite, list, roles, RBAC permissions, territory scope | Done |
+| [ATLAS-141](https://linear.app/atlasmed/issue/ATLAS-141/) | [BE] | Security infrastructure — rate limiting, session security, audit log, SIEM | Done |
+| [ATLAS-142](https://linear.app/atlasmed/issue/ATLAS-142/) | [BE] | Infrastructure services — Redis, BullMQ, email, SMS, metrics, health | Done |
+| [ATLAS-143](https://linear.app/atlasmed/issue/ATLAS-143/) | [BE] | Clinic CRUD API — list, get, create, update, soft delete, territory scope | Done |
+| [ATLAS-144](https://linear.app/atlasmed/issue/ATLAS-144/) | [BE] | Doctor CRUD API — list, get, create, update, soft delete | Done |
+| [ATLAS-145](https://linear.app/atlasmed/issue/ATLAS-145/) | [BE] | Registry ingestion framework — run pipeline, mock adapter, suggestions workflow | Done |
+| [ATLAS-146](https://linear.app/atlasmed/issue/ATLAS-146/) | [WE] | Web app shell — Next.js 16, protected routes, auth context, role-gated nav | Done |
+| [ATLAS-147](https://linear.app/atlasmed/issue/ATLAS-147/) | [WE] | Web auth UI — login, 2FA, register, forgot/reset password, verification | Done |
+| [ATLAS-148](https://linear.app/atlasmed/issue/ATLAS-148/) | [WE] | Web user admin — users, invites, sessions, security, profile | Done |
+| [ATLAS-149](https://linear.app/atlasmed/issue/ATLAS-149/) | [WE] | Web clinic & doctor UI — clinics list+detail, doctors list, registry suggestions | Done |

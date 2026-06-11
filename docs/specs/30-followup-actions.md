@@ -206,3 +206,15 @@ Follow-up notifications are managed by the notifications infrastructure (Spec 31
 2. ~~Should follow-ups generate entries in the Activity Log (Spec 09)?~~ **Resolved:** Yes — AC-FU-17.
 3. Is there an escalation flow (rep → manager) when a follow-up is blocked?
 4. Can customers see their own follow-ups through a future portal, or is this strictly internal?
+
+---
+
+## Linear Tickets
+
+| Ticket | Type | Title | Status |
+|--------|------|-------|--------|
+| [ATLAS-57](https://linear.app/atlasmed/issue/ATLAS-57/) | Parent | Spec 30: Follow-Up Actions | Backlog |
+| [ATLAS-58](https://linear.app/atlasmed/issue/ATLAS-58/) | [BE] | Follow-Up Actions — model, CRUD API & notification scheduling | Backlog |
+| [ATLAS-59](https://linear.app/atlasmed/issue/ATLAS-59/) | [MOB] | Follow-Up Actions — Flutter creation & list | Backlog |
+| [ATLAS-186](https://linear.app/atlasmed/issue/ATLAS-186/) | [WE] | Follow-Up Actions — manager team follow-up management | Backlog |
+| [ATLAS-187](https://linear.app/atlasmed/issue/ATLAS-187/) | [DESIGN] | Spec 30: Follow-Up Actions — manager web view | Backlog |

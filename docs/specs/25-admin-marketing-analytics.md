@@ -109,3 +109,14 @@ All analytics views SHALL support CSV export of the underlying data table.
 1. Should marketing users have a dedicated role with read-only access to analytics only?
 2. Should presentation slide thumbnails be embedded in the analytics (to show which slides are being skipped)?
 3. Is there a scheduled report feature (e.g. weekly email digest of product promotion metrics)?
+
+---
+
+## Linear Tickets
+
+| Ticket | Type | Title | Status |
+|--------|------|-------|--------|
+| [ATLAS-116](https://linear.app/atlasmed/issue/ATLAS-116/) | Parent | Spec 25: Admin Marketing Analytics | Backlog |
+| [ATLAS-117](https://linear.app/atlasmed/issue/ATLAS-117/) | [BE] | Admin Marketing Analytics — campaign & material metrics API | Backlog |
+| [ATLAS-118](https://linear.app/atlasmed/issue/ATLAS-118/) | [WE] | Admin Marketing Analytics — admin analytics dashboard | Backlog |
+| [ATLAS-183](https://linear.app/atlasmed/issue/ATLAS-183/) | [DESIGN] | Spec 25: Admin Marketing Analytics — campaign analytics UI | Backlog |
