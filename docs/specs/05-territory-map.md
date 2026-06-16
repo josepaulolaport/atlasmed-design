@@ -275,7 +275,9 @@ interface MapPin {
   lat: number;
   lng: number;
   status: ClinicStatus;
-  isPriority: boolean;
+  /** Denormalised from Clinic.priorityScore (0.0–1.0). Pins with score ≥ 0.70 = amber. */
+  priorityScore: number;
+  isPriority: boolean;        // derived: priorityScore >= 0.70
   name: string;
   lastVisitDays?: number;
 }
@@ -349,6 +351,42 @@ interface VisitLog {
  */
 ```
 
+### Prisma Schema Extensions
+
+```prisma
+model Clinic {
+  // ... existing fields ...
+  lat             Float?
+  lng             Float?
+  priorityScore   Float    @default(0.0)  // Computed nightly; ≥ 0.70 = high priority
+}
+
+model Visit {
+  // ... existing fields ...
+  locationVerified  Boolean  @default(false)  // false = manual override, no geofence confirm
+}
+
+model Route {
+  id                    String      @id @default(cuid())
+  userId                String
+  date                  DateTime    @db.Date
+  stops                 Json        // Serialised RouteStop[]
+  totalDistanceKm       Float?
+  estimatedDurationMin  Int?
+  status                RouteStatus @default(DRAFT)
+  createdAt             DateTime    @default(now())
+  updatedAt             DateTime    @updatedAt
+  user                  User        @relation(fields: [userId], references: [id])
+}
+
+enum RouteStatus {
+  DRAFT
+  ACTIVE
+  COMPLETED
+  ABANDONED
+}
+```
+
 ### Geofence Logic
 
 - Arrival detection: trigger when device coordinates are within **50 metres** of the stop's coordinates.
@@ -367,6 +405,39 @@ interface VisitLog {
 - Animate user-location with `flutter_map_location_marker` plugin
 - Offline tile caching via `CachedNetworkImage` tile provider or `flutter_map_tile_caching` plugin
 - Pin clustering via `flutter_map_supercluster` plugin
+
+### Route Optimization API
+
+Route optimization is computed **server-side** (API endpoint) to keep routing logic centralised, cacheable, and upgradeable without app releases.
+
+**MVP approach — Nearest-Neighbour Heuristic:**
+The API accepts an ordered list of stop coordinates + starting location. It returns an optimised stop order using the nearest-neighbour greedy heuristic (O(n²), acceptable for ≤ 20 stops). Travel time between stops is estimated via straight-line distance × road factor (1.3) and average urban speed (30 km/h) — no external routing API call needed for the MVP estimate.
+
+**Routing API (for turn-by-turn distance matrix):** Use **[OpenRouteService](https://openrouteservice.org/)** (free tier: 2,000 requests/day, self-hostable). Alternatively **OSRM** (self-hosted, no rate limits). **Do not use Google Directions API** by default due to per-request billing.
+
+```
+POST /api/v1/routes/optimize
+Body: { startLat, startLng, stops: [{ entityId, lat, lng }] }
+Response: { optimizedOrder: number[], estimatedDurationMinutes: number, totalDistanceKm: number }
+```
+
+The mobile app draws the route polyline by requesting road-snapped waypoints from the routing API and rendering them via `flutter_map`'s `PolylineLayer`.
+
+### Priority Scoring Algorithm (KPI-based Suggestions)
+
+The "Prioridade alta" flag and the "Sugestões para você" ranking are driven by a computed **Clinic Priority Score** calculated server-side and stored as a denormalised `priorityScore Float` on the `Clinic` record. The score is recomputed nightly via a BullMQ job and on-demand after each visit.
+
+```
+Priority Score (0.0 – 1.0) =
+  visit_overdue_factor   × 0.40   // (days_since_last_visit / target_frequency_days), capped at 1.0
+  + health_deficit_factor × 0.30   // (1.0 - clinic_health_score), from Spec 17
+  + campaign_match_factor × 0.20   // 1.0 if clinic has an active campaign target, else 0
+  + follow_up_pending_factor × 0.10 // 1.0 if an open follow-up is overdue, else 0
+```
+
+Clinics with `priorityScore ≥ 0.70` are labelled **"Prioridade alta"** in the UI (amber pin on map, "Alto potencial" pill in nearby list). The suggestion card (AC-MAP-03) surfaces the highest-scoring clinic within the rep's territory.
+
+Dynamic mid-route suggestions (AC-MAP-23) additionally filter by **proximity ≤ 1.5 km** from the current route polyline bounding box. The threshold is configurable via admin settings (default 1.5 km).
 
 ### Error & Edge Cases
 
@@ -394,18 +465,24 @@ The follow-ups list (AC-MAP-29–31) renders the data model defined in [Spec 30 
 ### Open Questions
 
 1. ~~What mapping SDK?~~ **Resolved:** `flutter_map` (OpenStreetMap). See Map SDK Requirements section.
-2. What is the threshold for triggering a dynamic route suggestion (distance, potential score)?
-3. How is route optimization computed — server-side (TSP) or client-side (heuristic)?
-4. Can representatives start a visit without geofence detection (manual override)?
-5. Should follow-ups created from the map be visible in the Activity Log and the BI dashboard?
-6. What is the definition of "Prioridade alta" — is it a computed score or a manual flag?
+2. ~~What is the threshold for triggering a dynamic route suggestion?~~ **Resolved:** proximity ≤ 1.5 km from current route + `priorityScore ≥ 0.70`. Admin-configurable. See Priority Scoring Algorithm section.
+3. ~~How is route optimization computed?~~ **Resolved:** Server-side nearest-neighbour heuristic for MVP; OpenRouteService or OSRM for road distance matrix. See Route Optimization API section.
+4. Can representatives start a visit without geofence detection (manual override)? — **Proposed: Yes.** A "Registrar visita" action is always available from the clinic bottom sheet regardless of GPS proximity. The visit record notes `locationVerified: false`. This avoids blocking users in areas with poor GPS signal.
+5. Should follow-ups created from the map be visible in the Activity Log and the BI dashboard? — **Proposed: Yes.** Follow-ups are Spec 30 `FollowUpAction` records regardless of creation source; Activity Log and BI naturally pick them up.
+6. ~~What is the definition of "Prioridade alta"?~~ **Resolved:** Computed `priorityScore ≥ 0.70` based on visit overdue factor, health deficit, campaign match, and open follow-up. See Priority Scoring Algorithm section.
 
 ---
 
 ## Linear Tickets
 
-| Ticket | Type | Title | Status |
-|--------|------|-------|--------|
-| [ATLAS-103](https://linear.app/atlasmed/issue/ATLAS-103/) | Parent | Spec 05: Territory Map | Backlog |
-| [ATLAS-104](https://linear.app/atlasmed/issue/ATLAS-104/) | [BE] | Territory Map — geo-indexed customer API | Backlog |
-| [ATLAS-105](https://linear.app/atlasmed/issue/ATLAS-105/) | [MOB] | Territory Map — Flutter flutter_map with customer pins | Backlog |
+| Ticket | Type | Points | Title | Status |
+|--------|------|--------|-------|--------|
+| [ATLAS-103](https://linear.app/atlasmed/issue/ATLAS-103/) | Parent | 21 | Spec 05: Territory Map | Backlog |
+| [ATLAS-219](https://linear.app/atlasmed/issue/ATLAS-219/) | [DESIGN] | 5 | Territory Map — all 14 screens & states | Backlog |
+| [ATLAS-104](https://linear.app/atlasmed/issue/ATLAS-104/) | [BE] | — | Territory Map — geo-indexed customer API & map pin endpoint | Backlog |
+| [ATLAS-220](https://linear.app/atlasmed/issue/ATLAS-220/) | [BE] | 8 | Territory Map — route optimization endpoint & routing API integration | Backlog |
+| [ATLAS-221](https://linear.app/atlasmed/issue/ATLAS-221/) | [BE] | 8 | Territory Map — priority scoring engine & dynamic suggestion API | Backlog |
+| [ATLAS-105](https://linear.app/atlasmed/issue/ATLAS-105/) | [MOB] | — | Territory Map — Flutter flutter_map initialisation & customer pins | Backlog |
+| [ATLAS-222](https://linear.app/atlasmed/issue/ATLAS-222/) | [MOB] | 8 | Territory Map — route planning UI, stop list & drag-to-reorder | Backlog |
+| [ATLAS-223](https://linear.app/atlasmed/issue/ATLAS-223/) | [MOB] | 13 | Territory Map — active navigation, geofencing & visit-in-progress | Backlog |
+| [ATLAS-225](https://linear.app/atlasmed/issue/ATLAS-225/) | [MOB] | 8 | Territory Map — favorites, nearby clinics list & full territory screen | Backlog |
